@@ -9,29 +9,24 @@
 
 ## Start the Supporting Services
 
-1. Start PostgreSQL with the repository's Docker Compose configuration once added.
-2. Configure PostgreSQL and Authentik OIDC settings through environment variables or mounted secrets.
+1. Ensure Docker is running; `./mvnw spring-boot:run` automatically starts `compose.yaml` and waits
+   for PostgreSQL to become healthy.
+2. Configure Authentik OIDC settings through environment variables or mounted secrets.
 3. Start the application with `./mvnw spring-boot:run`.
 4. Open the local application on desktop and mobile-sized browser viewports.
 
 ## Validate Core Behavior
 
-1. Sign in as a member and create two lists.
-2. Add `kipfilet 400g`; verify `Kip`, `Kipfilet`, `400`, and `gram` appear in an active item.
-3. Add `melk 2x1l`, then re-enter it; verify the existing item is focused and unchanged.
-4. Enter ambiguous input; verify no item is created and reformulation guidance appears.
-5. Create a custom product, select a starter category, and verify another member can find it.
-6. Purchase an item, verify it remains visible, then restore it.
-7. Re-add a purchased concrete item from recent needs and verify its details are preserved.
+1. Verify the application starts on port 8080 with the Compose-managed PostgreSQL instance.
+2. Verify Flyway applies the household, catalog, shopping, and history baseline schema.
+3. Verify unauthenticated requests are redirected to the Authentik sign-in route.
+4. Verify only active `MEMBER` rows in `household_member` resolve through the identity-module API.
 
 ## Validate Collaboration and Connectivity
 
-1. Sign in as two members in separate sessions and open the same list.
-2. Add, purchase, restore, remove, and change an item; verify the other member sees each confirmed
-   result within 3 seconds under normal connectivity.
-3. Change the same item nearly simultaneously; verify both sessions show the latest confirmed state.
-4. Interrupt one mobile-sized session; verify clear disconnected status and no false saved write.
-5. Restore connectivity and verify the list refreshes to the latest confirmed state.
+1. Verify the shell reports connected or disconnected state without presenting queued mutations as
+   saved.
+2. Verify `offline.html` is shown when the browser cannot load the application shell.
 
 ## Run Automated Verification
 
@@ -40,6 +35,5 @@
 ./mvnw verify
 ```
 
-Expected outcomes: domain and application behavior tests; PostgreSQL Testcontainers tests; Spring
-Modulith verification; and Playwright mobile-viewport journeys against the running application and
-PostgreSQL all pass.
+Expected outcomes: PostgreSQL Testcontainers migration, membership, and unauthenticated-access
+tests; Spring Modulith verification; and a successful Compose-backed application startup.
