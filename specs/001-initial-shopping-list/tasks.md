@@ -23,14 +23,14 @@ description: "Task list for implementing the Initial Shopping List feature"
 
 **Purpose**: Bootstrap the single Maven application, the development toolchain, and the `trunk`-based repository controls that apply to every slice.
 
-- [ ] T001 Create the Maven project descriptor with stable Java 25, Spring Boot, Vaadin Flow, Spring Modulith, Flyway, PostgreSQL, Testcontainers, AssertJ, and Playwright Java dependencies in pom.xml
-- [ ] T002 Create the Spring Boot entry point and package-by-business-capability module skeleton without generic base classes in src/main/java/dev/casteels/plukk/PlukkApplication.java
-- [ ] T003 [P] Create PostgreSQL, Flyway, Vaadin, PWA, and Authentik OIDC environment-variable placeholders in src/main/resources/application.yml
-- [ ] T004 [P] Create focused ignore rules for Maven, Vaadin-generated assets, IDE state, Playwright output, test reports, logs, local PostgreSQL data, environment overrides, credentials, and secrets in .gitignore
-- [ ] T005 [P] Record verified stable technology versions, developer prerequisites, and the project entry-point overview in README.md
-- [ ] T006 [P] Document Conventional Commits, short-lived branch workflow from `trunk`, rebase-or-squash linear integration, branch deletion, release-tag origin, and a Mermaid `gitGraph` in docs/development-workflow.md
-- [ ] T007 [P] Add CI validation for Maven verification, Conventional Commit messages and pull-request titles, and a `trunk`-only primary integration workflow in .github/workflows/verify.yml
-- [ ] T008 [P] Document required `trunk` branch protections, prohibited merge commits and force pushes, required checks, and rebase/squash integration settings in .github/branch-protection.md
+- [X] T001 Create the Maven project descriptor with stable Java 25, Spring Boot, Vaadin Flow, Spring Modulith, Flyway, PostgreSQL, Testcontainers, AssertJ, and Playwright Java dependencies in pom.xml
+- [X] T002 Create the Spring Boot entry point and package-by-business-capability module skeleton without generic base classes in src/main/java/dev/casteels/plukk/PlukkApplication.java
+- [X] T003 [P] Create PostgreSQL, Flyway, Vaadin, PWA, and Authentik OIDC environment-variable placeholders in src/main/resources/application.yml
+- [X] T004 [P] Create focused ignore rules for Maven, Vaadin-generated assets, IDE state, Playwright output, test reports, logs, local PostgreSQL data, environment overrides, credentials, and secrets in .gitignore
+- [X] T005 [P] Record verified stable technology versions, developer prerequisites, and the project entry-point overview in README.md
+- [X] T006 [P] Document Conventional Commits, short-lived branch workflow from `trunk`, rebase-or-squash linear integration, branch deletion, release-tag origin, and a Mermaid `gitGraph` in docs/development-workflow.md
+- [X] T007 [P] Add CI validation for Maven verification, Conventional Commit messages and pull-request titles, and a `trunk`-only primary integration workflow in .github/workflows/verify.yml
+- [X] T008 [P] Document required `trunk` branch protections, prohibited merge commits and force pushes, required checks, and rebase/squash integration settings in .github/branch-protection.md
 
 ---
 
@@ -40,14 +40,14 @@ description: "Task list for implementing the Initial Shopping List feature"
 
 **⚠️ CRITICAL**: Complete this phase before implementation work for a user story. Keep changes small, buildable, and releasable on `trunk` or a short-lived branch rebased onto current `trunk`.
 
-- [ ] T009 Create the Flyway baseline schema for household membership, categories, catalog products, shopping lists, shopping items, and shopping history with foreign keys and active-item uniqueness support in src/main/resources/db/migration/V1__initial_shopping_schema.sql
-- [ ] T010 [P] Seed fixed starter categories and starter catalog products in src/main/resources/db/migration/V2__seed_categories_and_catalog.sql
-- [ ] T011 [P] Implement Authentik OIDC sign-in, CSRF-safe Vaadin security, and member-only route authorization in src/main/java/dev/casteels/plukk/identity/SecurityConfiguration.java
-- [ ] T012 [P] Implement authenticated-subject-to-active-household-member resolution as an identity-module API in src/main/java/dev/casteels/plukk/identity/HouseholdMemberAccess.java
-- [ ] T013 [P] Define Spring Modulith application modules with narrow named API packages and verify allowed dependencies in src/test/java/dev/casteels/plukk/architecture/ModulithArchitectureTest.java
-- [ ] T014 [P] Implement the application shell, PWA metadata, static offline fallback, and explicit read-only connectivity status without client-side mutation queuing in src/main/java/dev/casteels/plukk/shared/ui/PlukkAppShell.java
-- [ ] T015 [P] Add PostgreSQL Testcontainers coverage for Flyway migration, active-member access, and rejected unauthenticated access using Given/When/Then test names in src/test/java/dev/casteels/plukk/identity/IdentityAndPersistenceIntegrationTest.java
-- [ ] T016 [P] Document module responsibilities, allowed dependencies, authentication boundary, and one-container-plus-PostgreSQL topology using focused Mermaid C4 and flowchart diagrams in docs/architecture.md
+- [X] T009 Create the Flyway baseline schema for household membership, categories, catalog products, shopping lists, shopping items, and shopping history with foreign keys and active-item uniqueness support in src/main/resources/db/migration/V1__initial_shopping_schema.sql
+- [X] T010 [P] Seed fixed starter categories and starter catalog products in src/main/resources/db/migration/V2__seed_categories_and_catalog.sql
+- [X] T011 [P] Implement Authentik OIDC sign-in, CSRF-safe Vaadin security, and member-only route authorization in src/main/java/dev/casteels/plukk/identity/SecurityConfiguration.java
+- [X] T012 [P] Implement authenticated-subject-to-active-household-member resolution as an identity-module API in src/main/java/dev/casteels/plukk/identity/HouseholdMemberAccess.java
+- [X] T013 [P] Define Spring Modulith application modules with narrow named API packages and verify allowed dependencies in src/test/java/dev/casteels/plukk/architecture/ModulithArchitectureTest.java
+- [X] T014 [P] Implement the application shell, PWA metadata, static offline fallback, and explicit read-only connectivity status without client-side mutation queuing in src/main/java/dev/casteels/plukk/shared/ui/PlukkAppShell.java
+- [X] T015 [P] Add PostgreSQL Testcontainers coverage for Flyway migration, active-member access, and rejected unauthenticated access using Given/When/Then test names in src/test/java/dev/casteels/plukk/identity/IdentityAndPersistenceIntegrationTest.java
+- [X] T016 [P] Document module responsibilities, allowed dependencies, authentication boundary, and one-container-plus-PostgreSQL topology using focused Mermaid C4 and flowchart diagrams in docs/architecture.md
 
 **Checkpoint**: The application has a secure, migrated PostgreSQL baseline, verified module boundaries, useful PWA fallback, and documented integration governance. No generic `Base*` persistence or service hierarchy has been introduced.
 
