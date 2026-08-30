@@ -1,0 +1,49 @@
+# Build output
+target/
+
+# Vaadin generated frontend and build artifacts
+node_modules/
+frontend/generated/
+src/main/frontend/generated/
+src/main/bundles/
+
+# Playwright and test output
+playwright-report/
+test-results/
+reports/
+surefire-reports/
+failsafe-reports/
+
+# Application logs and temporary runtime files
+logs/
+*.log
+*.log.*
+*.pid
+*.seed
+*.tmp
+*.temp
+
+# Local environment overrides and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Local container and database data
+.docker/
+docker-data/
+postgres-data/
+db-data/
+data/
+
+# IDE state
+.idea/*
+!.idea/.gitignore
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# macOS
+.DS_Store
