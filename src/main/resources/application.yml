@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: plukk
+  docker:
+    compose:
+      file: compose.yaml
+      lifecycle-management: start_only
+  datasource:
+    url: ${PLUKK_DB_URL:jdbc:postgresql://localhost:5432/plukk}
+    username: ${PLUKK_DB_USERNAME:plukk}
+    password: ${PLUKK_DB_PASSWORD:plukk}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      client:
+        registration:
+          authentik:
+            client-id: ${PLUKK_OIDC_CLIENT_ID:replace-me}
+            client-secret: ${PLUKK_OIDC_CLIENT_SECRET:replace-me}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          authentik:
+            authorization-uri: ${PLUKK_OIDC_AUTHORIZATION_URI:https://authentik.example.com/application/o/authorize/}
+            token-uri: ${PLUKK_OIDC_TOKEN_URI:https://authentik.example.com/application/o/token/}
+            user-info-uri: ${PLUKK_OIDC_USER_INFO_URI:https://authentik.example.com/application/o/userinfo/}
+            user-name-attribute: sub
+            jwk-set-uri: ${PLUKK_OIDC_JWK_SET_URI:https://authentik.example.com/application/o/jwks/}
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  forward-headers-strategy: framework
+
+vaadin:
+  launch-browser: false
+  allowed-packages: dev.casteels.plukk
+  pnpm:
+    enable: true
+
+plukk:
+  pwa:
+    offline-page-title: ${PLUKK_PWA_OFFLINE_TITLE:Offline}
+  security:
+    allowed-clock-skew: ${PLUKK_SECURITY_ALLOWED_CLOCK_SKEW:PT30S}
