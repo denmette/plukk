@@ -1,0 +1,60 @@
+name: Verify
+
+on:
+  push:
+    branches:
+      - trunk
+  pull_request:
+    branches:
+      - trunk
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Temurin 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Validate commit messages
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          pattern='^(feat|fix|test|docs|refactor|build|ci|chore|perf)(\([a-z0-9-]+\))?!?: .+$'
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            commits=$(git rev-list --no-merges "${PR_BASE_SHA}..${PR_HEAD_SHA}")
+          else
+            if [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+              commits=$(git rev-list --no-merges "${PUSH_BEFORE_SHA}..${PUSH_SHA}")
+            else
+              commits=$(printf '%s\n' "$PUSH_SHA")
+            fi
+          fi
+          for commit in $commits; do
+            subject=$(git log -1 --format=%s "$commit")
+            echo "Checking $commit: $subject"
+            printf '%s\n' "$subject" | grep -E "$pattern" >/dev/null
+          done
+
+      - name: Validate pull request title
+        if: github.event_name == 'pull_request'
+        run: |
+          pattern='^(feat|fix|test|docs|refactor|build|ci|chore|perf)(\([a-z0-9-]+\))?!?: .+$'
+          printf '%s\n' "${{ github.event.pull_request.title }}" | grep -E "$pattern" >/dev/null
+
+      - name: Run Maven verify
+        run: ./mvnw verify

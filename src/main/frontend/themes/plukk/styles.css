@@ -1,0 +1,27 @@
+:root {
+  --plukk-surface: #fffdf9;
+  --plukk-background: #f5f0e8;
+  --plukk-text: #1f2933;
+  --plukk-accent: #7a2e1f;
+}
+
+html,
+body {
+  background: var(--plukk-background);
+  color: var(--plukk-text);
+}
+
+.home-view {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(122, 46, 31, 0.12), transparent 30rem),
+    linear-gradient(180deg, #fbf6ef 0%, #f0e6d7 100%);
+}
+
+.intro-card {
+  max-width: 32rem;
+  background: var(--plukk-surface);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 1rem 2.5rem rgba(31, 41, 51, 0.12);
+}

@@ -6,6 +6,7 @@ node_modules/
 frontend/generated/
 src/main/frontend/generated/
 src/main/bundles/
+.vaadin-node-tasks.lock
 
 # Playwright and test output
 playwright-report/
@@ -28,6 +29,11 @@ logs/
 .env.*
 !.env.example
 !.env.sample
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
 
 # Local container and database data
 .docker/
@@ -47,3 +53,7 @@ data/
 
 # macOS
 .DS_Store
+
+# Temporary editor files
+*.swp
+*.swo
