@@ -2,6 +2,7 @@ package dev.casteels.plukk.identity;
 
 import java.util.Optional;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,6 +10,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!e2e")
 final class DatabaseHouseholdMemberAccess implements HouseholdMemberAccess {
 
     private final JdbcClient jdbcClient;

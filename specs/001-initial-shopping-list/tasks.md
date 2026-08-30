@@ -61,16 +61,16 @@ description: "Task list for implementing the Initial Shopping List feature"
 
 ### Tests for User Story 3
 
-- [ ] T017 [P] [US3] Add Given/When/Then application behavior tests for creating, renaming, opening, and deleting household lists in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationTest.java
-- [ ] T018 [P] [US3] Add PostgreSQL Testcontainers tests proving a member can manage only their household lists in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListPersistenceIntegrationTest.java
-- [ ] T019 [P] [US3] Add Playwright mobile-viewport coverage for create, rename, switch, and delete list journeys in src/test/java/dev/casteels/plukk/e2e/ShoppingListManagementE2ETest.java
+- [X] T017 [P] [US3] Add Given/When/Then application behavior tests for creating, renaming, opening, and deleting household lists in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationTest.java
+- [X] T018 [P] [US3] Add PostgreSQL Testcontainers tests proving a member can manage only their household lists in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListPersistenceIntegrationTest.java
+- [X] T019 [P] [US3] Add Playwright mobile-viewport coverage for create, rename, switch, and delete list journeys in src/test/java/dev/casteels/plukk/e2e/ShoppingListManagementE2ETest.java
 
 ### Implementation for User Story 3
 
-- [ ] T020 [P] [US3] Implement the explicit shopping-list aggregate, repository, and list-local persistence mapping in src/main/java/dev/casteels/plukk/shopping/list/ShoppingList.java
-- [ ] T021 [US3] Implement member-authorized create, rename, open, and delete list use cases in src/main/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationService.java
-- [ ] T022 [US3] Implement the mobile-first list overview, create/rename/delete controls, and list selection view in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListsView.java
-- [ ] T023 [US3] Document household list ownership, deletion semantics, and the list-management user flow with a Mermaid flowchart in docs/domain/shopping-lists.md
+- [X] T020 [P] [US3] Implement the explicit shopping-list aggregate, repository, and list-local persistence mapping in src/main/java/dev/casteels/plukk/shopping/list/ShoppingList.java
+- [X] T021 [US3] Implement member-authorized create, rename, open, and delete list use cases in src/main/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationService.java
+- [X] T022 [US3] Implement the mobile-first list overview, create/rename/delete controls, and list selection view in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListsView.java
+- [X] T023 [US3] Document household list ownership, deletion semantics, and the list-management user flow with a Mermaid flowchart in docs/domain/shopping-lists.md
 
 **Checkpoint**: Members can manage multiple household lists through a mobile-friendly, authorized vertical slice. Its tests, documentation, and cohesive Conventional Commit are ready for linear integration into `trunk`.
 
