@@ -3,14 +3,12 @@ package dev.casteels.plukk.e2e;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
 import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
 import dev.casteels.plukk.PlukkApplication;
 import dev.casteels.plukk.identity.HouseholdMemberAccess;
-import java.nio.file.Path;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,8 +64,7 @@ class AddShoppingNeedE2ETest {
         jdbc.sql("INSERT INTO household_member (household_id, external_subject, display_name, role) VALUES (1, 'e2e-member', 'E2E Member', 'MEMBER')").update();
         listId = jdbc.sql("INSERT INTO shopping_list (household_id, name) VALUES (1, 'Groceries') RETURNING id").query(Long.class).single();
         playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true)
-                .setExecutablePath(Path.of("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")));
+        browser = BrowserSupport.launch(playwright);
         page = browser.newPage(new Browser.NewPageOptions().setViewportSize(390, 844));
         page.navigate("http://localhost:" + port + "/lists/" + listId);
     }

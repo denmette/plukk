@@ -3,7 +3,6 @@ package dev.casteels.plukk.e2e;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
@@ -14,7 +13,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Path;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,9 +66,7 @@ class ShoppingListManagementE2ETest {
     void givenMobileMember_whenListJourneyStarts_thenOpenMobileBrowser() {
         jdbcClient.sql("DELETE FROM shopping_list").update();
         playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(true)
-                .setExecutablePath(Path.of("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")));
+        browser = BrowserSupport.launch(playwright);
         page = browser.newPage(new Browser.NewPageOptions().setViewportSize(390, 844));
     }
 

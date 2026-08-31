@@ -1,6 +1,5 @@
 package dev.casteels.plukk.e2e;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +27,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
@@ -70,8 +68,7 @@ class ReuseRecentNeedE2ETest {
         jdbc.sql("INSERT INTO household_member (household_id, external_subject, display_name, role) VALUES (1, 'reuse-member', 'Reuse Member', 'MEMBER')").update();
         listId = jdbc.sql("INSERT INTO shopping_list (household_id, name) VALUES (1, 'Groceries') RETURNING id").query(Long.class).single();
         playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true)
-                .setExecutablePath(Path.of("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")));
+        browser = BrowserSupport.launch(playwright);
         page = browser.newPage(new Browser.NewPageOptions().setViewportSize(390, 844));
         page.navigate("http://localhost:" + port + "/lists/" + listId);
     }

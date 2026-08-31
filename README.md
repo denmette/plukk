@@ -43,6 +43,19 @@ environment variables when using an external PostgreSQL instance or Authentik pr
 Run `./mvnw verify` with Docker running to execute the PostgreSQL Testcontainers integration suite
 and Spring Modulith architecture verification.
 
+## Running E2E Tests on Linux
+
+Playwright E2E tests prefer a system-installed Chrome/Chromium binary (see
+`src/test/java/dev/casteels/plukk/e2e/BrowserSupport.java`) and fall back to Playwright's own
+managed browser otherwise. On a bare Linux host or container, install one of:
+
+- A system browser via the package manager, e.g. `apt-get install -y chromium` or
+  `google-chrome-stable`, or
+- Playwright's managed browser and its native dependencies: `npx playwright install --with-deps chromium`
+
+Without either, `./mvnw verify` fails with a Playwright "Host system is missing dependencies to run
+browsers" error while trying to launch its bundled, dependency-less browser download.
+
 ## Production Identity Configuration
 
 Plukk authenticates users through an external Authentik OIDC provider. The following environment
