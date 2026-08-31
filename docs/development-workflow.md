@@ -1,39 +1,43 @@
 # Development Workflow
 
-Plukk uses `trunk` as its only permanent integration branch. Work either lands directly on
-`trunk` when it is small and safe, or on a short-lived branch that is rebased onto current
-`trunk` before integration.
+The [constitution](../.specify/memory/constitution.md) makes `trunk` the only permanent integration
+branch. This guide describes the repository practices that implement that policy.
 
-## Commit Rules
+## Branch and Review Flow
 
-- Use Conventional Commits in the format `<type>(optional-scope): description`.
-- Allowed types: `feat`, `fix`, `test`, `docs`, `refactor`, `build`, `ci`, `chore`, `perf`.
-- Keep commits cohesive: behavior changes travel with their tests and documentation.
+1. Start a short-lived branch from current `trunk` unless the change is small and safe enough for
+   direct integration.
+2. Rebase onto current `trunk` before review and again before integration when necessary.
+3. Keep pull requests focused, pass applicable CI checks, and integrate with rebase-and-merge or
+   squash-and-merge. Merge commits must not enter `trunk`.
+4. Delete the source branch after integration. Do not force-push published `trunk`; avoid
+   force-pushing shared branches without coordination.
 
-## Branch Rules
+## Commit and Repository Rules
 
-- Create short-lived branches from `trunk`.
-- Rebase regularly onto the latest `trunk`.
-- Integrate with rebase-and-merge or squash-and-merge only.
-- Delete the source branch after integration.
-- Do not merge `main`, `master`, `develop`, or other long-lived integration branches into the flow.
+Use Conventional Commits: `<type>(optional-scope): description`. Valid types are `feat`, `fix`,
+`test`, `docs`, `refactor`, `build`, `ci`, `chore`, and `perf`; breaking changes use the standard
+breaking-change notation. Make commits independently understandable and cohesive. Behavior changes
+normally include their tests and documentation.
 
-## Release Rules
+Keep `.gitignore` specific to the Plukk toolchain. Ignore generated build and Vaadin assets, IDE
+and machine state, Playwright output, test reports, logs, temporary files, local database data,
+environment overrides, credentials, and secrets. Track source, documentation, Spec Kit artifacts,
+Mermaid source, ADRs, and Maven Wrapper files.
 
-- Tag releases from `trunk`.
-- Keep `trunk` buildable, testable, and releasable at all times.
-- Reject merge commits and force pushes on `trunk`.
+## Platform Settings and Releases
 
-## Repository Graph
+Hosting should protect `trunk` with applicable status checks, linear history, no force pushes, and
+no merge commits. Release tags point to commits already on `trunk`; use consistent semantic tags
+such as `v1.0.0`. Permanent release branches and alternate integration branches are not allowed.
 
 ```mermaid
 gitGraph
-    commit id: "bootstrap"
-    branch feat/lists
-    checkout feat/lists
-    commit id: "feat(shopping): manage lists"
-    commit id: "test(shopping): cover list flow"
+    commit id: "trunk"
+    branch docs/governance
+    checkout docs/governance
+    commit id: "docs: guide changes"
     checkout trunk
-    merge feat/lists id: "squash or rebase"
-    commit id: "release prep"
+    commit id: "rebase or squash integration"
+    commit id: "release tag"
 ```
