@@ -1,267 +1,285 @@
 ---
 
-description: "Task list for implementing the Initial Shopping List feature"
+description: "Actionable task list for the Initial Shopping List feature"
 ---
 
 # Tasks: Initial Shopping List
 
 **Input**: Design documents from `/specs/001-initial-shopping-list/`
 
-**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, and `.specify/memory/constitution.md`
+**Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md),
+[data-model.md](./data-model.md), [contracts/](./contracts/), and [quickstart.md](./quickstart.md).
 
-**Tests**: Behavioral tests are mandatory. Java test methods use AssertJ and the naming convention `given<Precondition>_when<Action>_then<ExpectedBehavior>`; tests are written before the corresponding behavior and initially fail.
+**Tests**: Required by the specification and Constitution 1.4.2. Java tests use JUnit, AssertJ,
+Given/When/Then structure, and `given<Precondition>_when<Action>_then<ExpectedBehavior>` names.
+Use Testcontainers PostgreSQL for each state-owning module, `@ApplicationModuleTest` for exposed
+module behavior, and Playwright against the running application for critical mobile journeys.
 
-**Organization**: Tasks are grouped into usable vertical slices. Each slice includes behavior, persistence where needed, UI, automated validation, and audience-focused documentation. The `shared` package is restricted to concrete cross-cutting concerns and MUST NOT contain generic base entities, repositories, services, controllers, or UI abstractions.
+**Organization**: Tasks are grouped by independently testable user-story slices. The `shopping`
+module remains one cohesive capability; `shopping.list`, `shopping.input`, `shopping.item`, and
+`shopping.history` are internal packages, not artificial Modulith modules.
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: Can run in parallel after its stated dependencies (different files, no dependency on incomplete tasks)
-- **[Story]**: User-story slice label (`[US1]` through `[US5]`)
-- Every task includes an exact repository path
+- **[P]**: Can run in parallel after its stated prerequisites because it changes different files.
+- **[Story]**: Maps the task to a user story from the feature specification.
+- Every task includes an exact repository path.
 
-## Phase 1: Setup and Repository Governance
+## Phase 1: Setup
 
-**Purpose**: Bootstrap the single Maven application, the development toolchain, and the `trunk`-based repository controls that apply to every slice.
+**Purpose**: Establish the build and documentation conventions used by every slice.
 
-- [X] T001 Create the Maven project descriptor with stable Java 25, Spring Boot, Vaadin Flow, Spring Modulith, Flyway, PostgreSQL, Testcontainers, AssertJ, and Playwright Java dependencies in pom.xml
-- [X] T002 Create the Spring Boot entry point and package-by-business-capability module skeleton without generic base classes in src/main/java/dev/casteels/plukk/PlukkApplication.java
-- [X] T003 [P] Create PostgreSQL, Flyway, Vaadin, PWA, and Authentik OIDC environment-variable placeholders in src/main/resources/application.yml
-- [X] T004 [P] Create focused ignore rules for Maven, Vaadin-generated assets, IDE state, Playwright output, test reports, logs, local PostgreSQL data, environment overrides, credentials, and secrets in .gitignore
-- [X] T005 [P] Record verified stable technology versions, developer prerequisites, and the project entry-point overview in README.md
-- [X] T006 [P] Document Conventional Commits, short-lived branch workflow from `trunk`, rebase-or-squash linear integration, branch deletion, release-tag origin, and a Mermaid `gitGraph` in docs/development-workflow.md
-- [X] T007 [P] Add CI validation for Maven verification, Conventional Commit messages and pull-request titles, and a `trunk`-only primary integration workflow in .github/workflows/verify.yml
-- [X] T008 [P] Document required `trunk` branch protections, prohibited merge commits and force pushes, required checks, and rebase/squash integration settings in .github/branch-protection.md
+- [ ] T001 Verify stable Java, Spring Boot, Vaadin, Spring Modulith, Testcontainers, and Playwright versions and record the validated baseline in README.md
+- [ ] T002 [P] Configure the Maven verification lifecycle for JUnit, Testcontainers, Spring Modulith, and Playwright Java in pom.xml
+- [ ] T003 [P] Document the production Authentik variables and isolated development/test identity profiles in README.md
 
 ---
 
-## Phase 2: Foundational Boundaries
+## Phase 2: Foundational Capability Boundaries
 
-**Purpose**: Establish explicit security, persistence, module, PWA, and architecture foundations without creating a shared dumping ground.
+**Purpose**: Complete the capability, authorization, persistence, and outcome boundaries that block
+all user stories.
 
-**⚠️ CRITICAL**: Complete this phase before implementation work for a user story. Keep changes small, buildable, and releasable on `trunk` or a short-lived branch rebased onto current `trunk`.
+**Checkpoint**: `identity` is a stateless authentication adapter; `household`, `catalog`, and
+`shopping` own their persistent state and Flyway locations; views call public Use Cases; expected
+failures return Notifications.
 
-- [X] T009 Create the Flyway baseline schema for household membership, categories, catalog products, shopping lists, shopping items, and shopping history with foreign keys and active-item uniqueness support in src/main/resources/db/migration/V1__initial_shopping_schema.sql
-- [X] T010 [P] Seed fixed starter categories and starter catalog products in src/main/resources/db/migration/V2__seed_categories_and_catalog.sql
-- [X] T011 [P] Implement Authentik OIDC sign-in, CSRF-safe Vaadin security, and member-only route authorization in src/main/java/dev/casteels/plukk/identity/SecurityConfiguration.java
-- [X] T012 [P] Implement authenticated-subject-to-active-household-member resolution as an identity-module API in src/main/java/dev/casteels/plukk/identity/HouseholdMemberAccess.java
-- [X] T013 [P] Define Spring Modulith application modules with narrow named API packages and verify allowed dependencies in src/test/java/dev/casteels/plukk/architecture/ModulithArchitectureTest.java
-- [X] T014 [P] Implement the application shell, PWA metadata, static offline fallback, and explicit read-only connectivity status without client-side mutation queuing in src/main/java/dev/casteels/plukk/shared/ui/PlukkAppShell.java
-- [X] T015 [P] Add PostgreSQL Testcontainers coverage for Flyway migration, active-member access, and rejected unauthenticated access using Given/When/Then test names in src/test/java/dev/casteels/plukk/identity/IdentityAndPersistenceIntegrationTest.java
-- [X] T016 [P] Document module responsibilities, allowed dependencies, authentication boundary, and one-container-plus-PostgreSQL topology using focused Mermaid C4 and flowchart diagrams in docs/architecture.md
-
-**Checkpoint**: The application has a secure, migrated PostgreSQL baseline, verified module boundaries, useful PWA fallback, and documented integration governance. No generic `Base*` persistence or service hierarchy has been introduced.
+- [ ] T004 Move the fresh-install household and membership schema into the household-owned Flyway location in src/main/resources/db/migration/household/V1__household_and_members.sql
+- [ ] T005 [P] Move fixed category and starter-product schema and seed data into the catalog-owned Flyway location in src/main/resources/db/migration/catalog/V1__catalog_and_categories.sql
+- [ ] T006 [P] Move shopping-list, item, active-identity, and history schema into the shopping-owned Flyway location in src/main/resources/db/migration/shopping/V1__shopping_lists_items_and_history.sql
+- [ ] T007 Remove superseded shared migrations and configure the three module-owned Flyway locations in src/main/resources/db/migration/V1__initial_shopping_schema.sql, src/main/resources/db/migration/V2__seed_categories_and_catalog.sql, and src/main/resources/application.yml
+- [ ] T008 Define explicit Spring Modulith APIs and allowed dependencies in src/main/java/dev/casteels/plukk/identity/package-info.java, src/main/java/dev/casteels/plukk/household/package-info.java, src/main/java/dev/casteels/plukk/catalog/package-info.java, src/main/java/dev/casteels/plukk/shopping/package-info.java, src/main/java/dev/casteels/plukk/collaboration/package-info.java, and src/main/java/dev/casteels/plukk/shared/package-info.java
+- [ ] T009 Create the framework-independent authenticated-subject API and keep Spring Security/OIDC extraction inside identity in src/main/java/dev/casteels/plukk/identity/api/AuthenticatedSubject.java and src/main/java/dev/casteels/plukk/identity/DatabaseAuthenticatedSubject.java
+- [ ] T010 Create the household-owned role-aware authorization API for active OWNER and MEMBER access, with GUEST denial, in src/main/java/dev/casteels/plukk/household/api/AuthorizedHouseholdUser.java and src/main/java/dev/casteels/plukk/household/DatabaseHouseholdAuthorization.java
+- [ ] T011 Add isolated development and test identity configurations that preserve household authorization and cannot activate in production in src/main/java/dev/casteels/plukk/identity/DevelopmentIdentityConfiguration.java and src/test/resources/application-e2e.yml
+- [ ] T012 [P] Strengthen module and layer verification for public APIs, forbidden cross-module persistence access, and Use Case-only orchestration in src/test/java/dev/casteels/plukk/architecture/ModulithArchitectureTest.java and src/test/java/dev/casteels/plukk/architecture/UseCaseArchitectureTest.java
+- [ ] T013 [P] Add PostgreSQL Testcontainers coverage for owned household data and OWNER/MEMBER/GUEST authorization through the household API in src/test/java/dev/casteels/plukk/household/HouseholdAuthorizationIntegrationTest.java
+- [ ] T014 Make Notification issue codes and successful outcomes the shared contract for expected user-correctable failures in src/main/java/dev/casteels/plukk/shared/notification/Notification.java and src/main/java/dev/casteels/plukk/shared/notification/NotificationIssue.java
+- [ ] T015 [P] Verify the production Authentik route, isolated test identity, CSRF protection, and role denial without globally disabling security in src/test/java/dev/casteels/plukk/identity/IdentityAndPersistenceIntegrationTest.java
 
 ---
 
-## Phase 3: User Story 3 - Manage Household Shopping Lists (Priority: P1) 🎯
+## Phase 3: User Story 3 - Manage Household Shopping Lists (Priority: P1)
 
-**Goal**: Members can create, rename, open, and delete named lists in their household.
+**Goal**: Authorized owners and members create, open, rename, and delete household lists through
+the `shopping` module’s focused Use Cases.
 
-**Independent Test**: A signed-in member creates two lists, renames one, opens either, and deletes one while the other remains available.
+**Independent Test**: An owner or member creates two lists, receives Notification feedback for a
+blank name, renames and opens one, deletes the other, and cannot access a list outside the
+household.
 
 ### Tests for User Story 3
 
-- [X] T017 [P] [US3] Add Given/When/Then application behavior tests for creating, renaming, opening, and deleting household lists in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationTest.java
-- [X] T018 [P] [US3] Add PostgreSQL Testcontainers tests proving a member can manage only their household lists in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListPersistenceIntegrationTest.java
-- [X] T019 [P] [US3] Add Playwright mobile-viewport coverage for create, rename, switch, and delete list journeys in src/test/java/dev/casteels/plukk/e2e/ShoppingListManagementE2ETest.java
+- [ ] T016 [P] [US3] Add focused public-Use-Case tests for create, find, open, rename, delete, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationTest.java
+- [ ] T017 [P] [US3] Add PostgreSQL Testcontainers tests for shopping-owned list persistence, household scoping, and deletion behavior in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListPersistenceIntegrationTest.java
+- [ ] T018 [P] [US3] Add Playwright mobile coverage for owner/member list management and guest denial in src/test/java/dev/casteels/plukk/e2e/ShoppingListManagementE2ETest.java
 
 ### Implementation for User Story 3
 
-- [X] T020 [P] [US3] Implement the explicit shopping-list aggregate, repository, and list-local persistence mapping in src/main/java/dev/casteels/plukk/shopping/list/ShoppingList.java
-- [X] T021 [US3] Implement member-authorized create, rename, open, and delete list use cases in src/main/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationService.java
-- [X] T022 [US3] Implement the mobile-first list overview, create/rename/delete controls, and list selection view in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListsView.java
-- [X] T023 [US3] Document household list ownership, deletion semantics, and the list-management user flow with a Mermaid flowchart in docs/domain/shopping-lists.md
+- [ ] T019 [US3] Refactor list Use Cases to depend only on the household authorization API and return explicit Notification-bearing results in src/main/java/dev/casteels/plukk/shopping/list/CreateShoppingListUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/FindShoppingListsUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/OpenShoppingListUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/RenameShoppingListUseCase.java, and src/main/java/dev/casteels/plukk/shopping/list/DeleteShoppingListUseCase.java
+- [ ] T020 [US3] Keep list domain rules and the shopping-owned persistence adapter internal while exposing only deliberate list result types in src/main/java/dev/casteels/plukk/shopping/list/ShoppingList.java, src/main/java/dev/casteels/plukk/shopping/list/ShoppingListRepository.java, and src/main/java/dev/casteels/plukk/shopping/list/ShoppingListMembership.java
+- [ ] T021 [US3] Update list views to call public list Use Cases and translate expected failures to Vaadin feedback in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListsView.java and src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
+- [ ] T022 [US3] Update the household-list flow and authorization documentation in docs/domain/shopping-lists.md
 
-**Checkpoint**: Members can manage multiple household lists through a mobile-friendly, authorized vertical slice. Its tests, documentation, and cohesive Conventional Commit are ready for linear integration into `trunk`.
+**Checkpoint**: List management is a usable, independently tested `shopping` slice with no direct
+identity persistence access and no expected validation exceptions.
 
 ---
 
 ## Phase 4: User Story 1 - Add a Shopping Need Quickly (Priority: P1) 🎯 MVP
 
-**Goal**: Members add a concrete shopping need from concise text, create a missing local product, and receive clear feedback for unsupported input.
+**Goal**: An authorized owner or member adds one supported free-text need, creates a household-local
+custom product when needed, and receives immediate reformulation or duplicate feedback.
 
-**Independent Test**: A signed-in member opens a list, enters `kipfilet 400g` and `melk 2x1l`, sees confirmed active items, creates a missing custom product, and receives reformulation guidance for ambiguous input.
+**Independent Test**: An authorized user creates a list, adds `kipfilet 400g` and `melk 2x1l`,
+creates a custom product for an unknown product, and receives a Notification without a persisted
+item for ambiguous input.
 
 ### Tests for User Story 1
 
-- [X] T024 [P] [US1] Add Given/When/Then parser behavior tests for supported quantities, units, multipliers, packages, ambiguous input, and reformulation feedback in src/test/java/dev/casteels/plukk/shopping/input/ShoppingInputParserTest.java
-- [X] T025 [P] [US1] Add PostgreSQL Testcontainers tests for confirmed item creation, exact-active duplicate focusing, and custom-product fallback in src/test/java/dev/casteels/plukk/shopping/input/AddShoppingNeedIntegrationTest.java
-- [X] T026 [P] [US1] Add Playwright mobile-viewport coverage for supported input, custom-product creation, confirmation-only feedback, and failed parsing in src/test/java/dev/casteels/plukk/e2e/AddShoppingNeedE2ETest.java
+- [ ] T023 [P] [US1] Extend parser behavior tests for supported quantities, package forms, variants, and reformulation feedback in src/test/java/dev/casteels/plukk/shopping/input/ShoppingInputParserTest.java
+- [ ] T024 [P] [US1] Add PostgreSQL Testcontainers tests for catalog lookup, custom product creation, active-item uniqueness, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/input/AddShoppingNeedIntegrationTest.java
+- [ ] T025 [P] [US1] Add Playwright mobile coverage for supported add, custom-product creation, duplicate focus, and invalid-input feedback in src/test/java/dev/casteels/plukk/e2e/AddShoppingNeedE2ETest.java
 
 ### Implementation for User Story 1
 
-- [X] T027 [P] [US1] Implement explicit catalog product and fixed-category persistence mappings with household-scoped custom products in src/main/java/dev/casteels/plukk/catalog/product/CatalogProduct.java
-- [X] T028 [P] [US1] Implement the concrete shopping-item aggregate, normalized active-item identity, and confirmed add state in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItem.java
-- [X] T029 [US1] Implement one-supported-interpretation parsing and user-safe reformulation results in src/main/java/dev/casteels/plukk/shopping/input/ShoppingInputParser.java
-- [X] T030 [US1] Implement authorized add-need orchestration, persisted duplicate detection that keeps an exact active match unchanged, and local custom-product creation in src/main/java/dev/casteels/plukk/shopping/input/AddShoppingNeedApplicationService.java
-- [X] T031 [US1] Implement the one-handed text-entry interaction and fixed-category custom-product dialog in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java
-- [X] T032 [US1] Integrate confirmation-only add feedback, duplicate-item focus, and safe unexpected-error handling in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
-- [X] T033 [US1] Document supported input grammar, accepted examples, custom-product fallback, duplicate behavior, and a Mermaid parse-decision flowchart in docs/domain/shopping-input.md
+- [ ] T026 [US1] Expose catalog category lookup and household product lookup/create APIs without exposing catalog persistence internals in src/main/java/dev/casteels/plukk/catalog/api/CatalogProductAccess.java and src/main/java/dev/casteels/plukk/catalog/api/ShoppingCategoryAccess.java
+- [ ] T027 [US1] Refactor concise-input parsing and add/custom-product Use Cases to use household and catalog APIs and return Notification-based outcomes in src/main/java/dev/casteels/plukk/shopping/input/ShoppingInputParser.java, src/main/java/dev/casteels/plukk/shopping/input/AddShoppingNeedUseCase.java, src/main/java/dev/casteels/plukk/shopping/input/CreateCustomProductAndAddShoppingNeedUseCase.java, and src/main/java/dev/casteels/plukk/shopping/input/ShoppingNeedOutcome.java
+- [ ] T028 [US1] Keep concrete-item insertion and exact-active-item detection inside the shopping persistence adapter in src/main/java/dev/casteels/plukk/shopping/input/ShoppingNeedRepository.java
+- [ ] T029 [US1] Update the add component and list-detail integration to render confirmation, duplicate, custom-product, and reformulation states from Use Case outcomes in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java and src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
+- [ ] T030 [US1] Align the supported-input documentation and behavior contract with Notification outcomes in docs/domain/shopping-input.md and specs/001-initial-shopping-list/contracts/shopping-input.md
 
-**Checkpoint**: A member can quickly add reliable, confirmed shopping needs without accidental duplicates or silent interpretation. The slice remains usable with documentation and tests integrated before its cohesive Conventional Commit reaches `trunk`.
+**Checkpoint**: The MVP free-text add flow works independently after list management and never
+creates an item from an uncertain interpretation.
 
 ---
 
 ## Phase 5: User Story 2 - Shop From a Clear List (Priority: P1)
 
-**Goal**: Members recognize active items quickly and purchase, restore, or remove them without losing context.
+**Goal**: Authorized users see category-grouped items and can purchase, restore, or remove an item
+while purchased items remain visible until removal.
 
-**Independent Test**: A member opens a populated list, sees category-grouped active items, marks one purchased, restores it, removes another, and verifies purchased items remain visible until removal.
+**Independent Test**: A user sees active items grouped by category, marks one purchased, restores
+it, removes it, and receives Notification feedback for a correctable missing-item request.
 
 ### Tests for User Story 2
 
-- [ ] T034 [P] [US2] Add Given/When/Then behavior tests for category grouping, purchase, restore, remove, and active-item prominence in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemApplicationTest.java
-- [ ] T035 [P] [US2] Add PostgreSQL Testcontainers tests for reversible item state transitions and deletion consistency in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemPersistenceIntegrationTest.java
-- [ ] T036 [P] [US2] Add Playwright mobile-viewport coverage for grouped display, purchase, restore, and remove interactions in src/test/java/dev/casteels/plukk/e2e/ShoppingListInteractionE2ETest.java
+- [ ] T031 [P] [US2] Add public-Use-Case tests for grouped sections, purchase, restore, removal, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemUseCaseTest.java
+- [ ] T032 [P] [US2] Add PostgreSQL Testcontainers tests for reversible item state, category ordering, removal, and household authorization in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemPersistenceIntegrationTest.java
+- [ ] T033 [P] [US2] Add Playwright mobile coverage for grouped active and purchased rendering, purchase, restore, and removal in src/test/java/dev/casteels/plukk/e2e/ShoppingListInteractionE2ETest.java
 
 ### Implementation for User Story 2
 
-- [ ] T037 [US2] Implement member-authorized purchase, restore, remove, and confirmed item-read use cases in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemApplicationService.java
-- [ ] T038 [P] [US2] Implement category-grouped list presentation data that keeps active items visually dominant in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListSections.java
-- [ ] T039 [US2] Implement touch-friendly purchase, restore, remove, and purchased-state rendering in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
-- [ ] T040 [US2] Document item states, reversibility, category grouping, and a Mermaid state diagram for active and purchased items in docs/domain/shopping-items.md
+- [ ] T034 [US2] Implement shopping-owned item domain state and persistence operations for grouped reads and reversible mutations in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItem.java, src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemRepository.java, and src/main/java/dev/casteels/plukk/shopping/item/ShoppingListSection.java
+- [ ] T035 [US2] Implement one-operation item Use Cases with Notification-bearing results in src/main/java/dev/casteels/plukk/shopping/item/GetShoppingListSectionsUseCase.java, src/main/java/dev/casteels/plukk/shopping/item/PurchaseShoppingItemUseCase.java, src/main/java/dev/casteels/plukk/shopping/item/RestoreShoppingItemUseCase.java, and src/main/java/dev/casteels/plukk/shopping/item/RemoveShoppingItemUseCase.java
+- [ ] T036 [US2] Render mobile-first category sections, touch targets, purchased state, and Use Case feedback in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java and src/main/frontend/themes/plukk/styles.css
+- [ ] T037 [US2] Document item state transitions and grouped-list behavior in docs/domain/shopping-items.md and specs/001-initial-shopping-list/contracts/ui-behavior.md
 
-**Checkpoint**: Shopping trips are supported by a clear, reversible list UI. Tests and domain documentation travel with this slice, ready for linear `trunk` integration.
+**Checkpoint**: The list is practical in a store and item mutations are independently tested
+behavior rather than UI-side state changes.
 
 ---
 
 ## Phase 6: User Story 4 - Reuse Products and Recent Needs (Priority: P2)
 
-**Goal**: Members search the household catalog and re-add a purchased concrete need without retyping its useful details.
+**Goal**: Authorized users search the household catalog and re-add household-wide recent concrete
+needs with copied details.
 
-**Independent Test**: A member searches starter and custom products, purchases `Kipfilet - 400 g`, and re-adds it from recent needs with variant, quantity, and unit preserved.
+**Independent Test**: One authorized user purchases `Kipfilet - 400 g`; another finds it in recent
+needs and re-adds the same variant, quantity, and unit without duplicate active-item creation.
 
 ### Tests for User Story 4
 
-- [ ] T041 [P] [US4] Add Given/When/Then behavior tests for starter/custom catalog search, purchase-history refresh, and recent-need re-addition in src/test/java/dev/casteels/plukk/catalog/CatalogReuseApplicationTest.java
-- [ ] T042 [P] [US4] Add PostgreSQL Testcontainers tests for household-scoped catalog visibility and copied concrete history details in src/test/java/dev/casteels/plukk/shopping/history/ShoppingHistoryIntegrationTest.java
-- [ ] T043 [P] [US4] Add Playwright mobile-viewport coverage for catalog search and recent-need re-addition in src/test/java/dev/casteels/plukk/e2e/ReuseRecentNeedE2ETest.java
+- [ ] T038 [P] [US4] Add public-Use-Case tests for catalog search, household-wide recent lookup, copied details, and duplicate Notification outcomes in src/test/java/dev/casteels/plukk/shopping/history/ShoppingHistoryUseCaseTest.java
+- [ ] T039 [P] [US4] Add PostgreSQL Testcontainers tests for catalog visibility, household-wide history, and re-add persistence in src/test/java/dev/casteels/plukk/shopping/history/ShoppingHistoryIntegrationTest.java
+- [ ] T040 [P] [US4] Add Playwright mobile coverage for catalog search and cross-member recent-need re-addition in src/test/java/dev/casteels/plukk/e2e/ReuseRecentNeedE2ETest.java
 
 ### Implementation for User Story 4
 
-- [ ] T044 [P] [US4] Implement the shopping-history entry mapping that copies concrete purchased-item details in src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryEntry.java
-- [ ] T045 [US4] Implement catalog search, recent-need lookup, and confirmed re-add use cases without predictive suggestions in src/main/java/dev/casteels/plukk/catalog/CatalogReuseApplicationService.java
-- [ ] T046 [US4] Record or refresh concrete shopping history only after a confirmed purchase in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemApplicationService.java
-- [ ] T047 [US4] Implement mobile catalog-search and recent-needs affordances in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java
-- [ ] T048 [US4] Document catalog visibility, fixed categories, recent-need retention, and a Mermaid sequence diagram for confirmed purchase-to-re-add in docs/domain/catalog-and-history.md
+- [ ] T041 [US4] Implement catalog search as a public catalog Use Case using catalog-owned persistence in src/main/java/dev/casteels/plukk/catalog/SearchCatalogProductsUseCase.java and src/main/java/dev/casteels/plukk/catalog/product/CatalogProductRepository.java
+- [ ] T042 [US4] Implement household-wide history recording, recent lookup, and re-addition through one-operation shopping Use Cases in src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryEntry.java, src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryRepository.java, src/main/java/dev/casteels/plukk/shopping/history/ListRecentShoppingNeedsUseCase.java, and src/main/java/dev/casteels/plukk/shopping/history/ReAddShoppingNeedUseCase.java
+- [ ] T043 [US4] Record copied concrete details only after a purchase is confirmed in src/main/java/dev/casteels/plukk/shopping/item/PurchaseShoppingItemUseCase.java
+- [ ] T044 [US4] Add catalog-search and recent-need UI affordances that translate Use Case outcomes in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java
+- [ ] T045 [US4] Document catalog ownership and household-wide history reuse in docs/domain/catalog-and-history.md
 
-**Checkpoint**: Familiar products and concrete recent needs reduce repeat typing without adding favorites, prediction, or recurring suggestions. Documentation and tests are complete within the slice.
+**Checkpoint**: Reuse is household-wide, non-predictive, and retains concrete shopping details.
 
 ---
 
 ## Phase 7: User Story 5 - Collaborate Safely During Shopping (Priority: P2)
 
-**Goal**: Confirmed shared-list changes propagate promptly, connection state is clear, and concurrent same-item changes resolve to the latest confirmed state.
+**Goal**: Confirmed changes become visible to other active users, reconnection is explicit, and the
+latest confirmed same-item change wins without offline mutation support.
 
-**Independent Test**: Two signed-in members view a list; confirmed changes appear in the other session, interrupted writes are never shown as saved, reconnect refreshes state, and two confirmed same-item changes end in the state from the later confirmation.
+**Independent Test**: Two authorized browser sessions observe confirmed changes; an interrupted
+write is not shown saved; reconnection refreshes the list; later confirmed same-item mutation wins.
 
 ### Tests for User Story 5
 
-- [ ] T049 [P] [US5] Add Given/When/Then application tests proving only confirmed mutations publish and later-confirmed same-item mutations replace earlier confirmed state in src/test/java/dev/casteels/plukk/collaboration/SharedListCollaborationApplicationTest.java
-- [ ] T050 [P] [US5] Add PostgreSQL Testcontainers concurrency tests that serialize same-item confirmed changes and assert latest-confirmed-wins rather than optimistic-lock rejection or silent loss in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemConcurrencyIntegrationTest.java
-- [ ] T051 [P] [US5] Add Playwright dual-session mobile coverage for add, purchase, restore, remove, update, disconnect, interrupted confirmation, reconnect refresh, and latest-confirmed-wins behavior in src/test/java/dev/casteels/plukk/e2e/SharedShoppingListCollaborationE2ETest.java
+- [ ] T046 [P] [US5] Add focused collaboration-module tests proving only confirmed changes publish and later confirmation is authoritative in src/test/java/dev/casteels/plukk/collaboration/SharedListCollaborationModuleTest.java
+- [ ] T047 [P] [US5] Add PostgreSQL Testcontainers concurrency tests for ordered same-item confirmations in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemConcurrencyIntegrationTest.java
+- [ ] T048 [P] [US5] Add dual-session Playwright mobile coverage for shared updates, interruption, recovery, and winning state in src/test/java/dev/casteels/plukk/e2e/SharedShoppingListCollaborationE2ETest.java
 
 ### Implementation for User Story 5
 
-- [ ] T052 [P] [US5] Implement confirmed shopping-list change events and household/list-scoped publication channels in src/main/java/dev/casteels/plukk/collaboration/ShoppingListChangePublisher.java
-- [ ] T053 [US5] Implement transactional same-item command serialization with a persisted confirmation sequence so every later confirmed mutation becomes authoritative instead of being rejected by optimistic locking in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemConcurrencyService.java
-- [ ] T054 [US5] Publish only post-commit list and item changes from shopping application services in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemApplicationService.java
-- [ ] T055 [US5] Implement explicit disconnected, reconnecting, confirmed, and unresolved-write UI states without offline mutation queues in src/main/java/dev/casteels/plukk/shopping/ui/ConnectivityStatusBanner.java
-- [ ] T056 [US5] Refresh open list views from confirmed collaboration events and reconnection recovery in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
-- [ ] T057 [US5] Document confirmed-event propagation, connectivity states, the latest-confirmed-wins sequence, and Mermaid sequence/state diagrams in docs/domain/collaboration-and-connectivity.md
+- [ ] T049 [US5] Publish a shopping public event only after a committed list or item mutation in src/main/java/dev/casteels/plukk/shopping/api/ConfirmedShoppingListChange.java and src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemChangePublisher.java
+- [ ] T050 [US5] Implement the stateless collaboration subscriber and confirmed-change delivery boundary without persistent tables in src/main/java/dev/casteels/plukk/collaboration/ConfirmedShoppingListChangeListener.java and src/main/java/dev/casteels/plukk/collaboration/ShoppingListChangeBroadcaster.java
+- [ ] T051 [US5] Add monotonic confirmation ordering to shopping item mutations so the latest confirmed write becomes authoritative in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemRepository.java, src/main/java/dev/casteels/plukk/shopping/item/PurchaseShoppingItemUseCase.java, src/main/java/dev/casteels/plukk/shopping/item/RestoreShoppingItemUseCase.java, and src/main/java/dev/casteels/plukk/shopping/item/RemoveShoppingItemUseCase.java
+- [ ] T052 [US5] Render disconnected, confirmation-interrupted, reconnected, and confirmed-refresh states without an offline queue in src/main/java/dev/casteels/plukk/shared/ui/ConnectivityStatusBanner.java and src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
+- [ ] T053 [US5] Document post-commit publication, reconnection, and latest-confirmed-wins behavior in docs/domain/collaboration-and-connectivity.md
 
-**Checkpoint**: Collaboration preserves trust: persistence confirmation determines both publication and winning order, with no rejected-later-confirmed write, no silent loss, and no false saved status.
-
----
-
-## Phase 8: Final Verification and Cross-Slice Hygiene
-
-**Purpose**: Verify the complete release and only genuinely cross-slice material. Documentation is already delivered per slice and is reviewed here for consistency, not deferred creation.
-
-- [ ] T058 [P] Review all Markdown documentation for current setup, architecture, operational guidance, and Mermaid source accuracy in README.md
-- [ ] T059 [P] Add Docker Compose, external PostgreSQL, backup/restore, Authentik configuration, Playwright setup, and troubleshooting guidance with a Mermaid deployment diagram in docs/operations.md
-- [ ] T060 [P] Add a quality-gate checklist for Given/When/Then names, AssertJ, Testcontainers, Playwright, Modulith verification, documentation, Conventional Commits, and linear `trunk` integration in docs/release-checklist.md
-- [ ] T061 Run the full Maven test and verification suite and resolve cross-slice failures in pom.xml
-- [ ] T062 Verify the feature branch is rebased on current `trunk`, all commits are cohesive Conventional Commits, the integration is rebase-or-squash only, and the source branch can be deleted after integration in docs/development-workflow.md
+**Checkpoint**: Collaboration communicates only durable server-confirmed state and preserves the
+explicit no-offline-write boundary.
 
 ---
 
-## Dependencies & Execution Order
+## Phase 8: Polish and Cross-Cutting Verification
+
+**Purpose**: Complete operational documentation and release evidence after all desired slices.
+
+- [ ] T054 [P] Document Authentik production setup, isolated local/test identity, PostgreSQL backup/restore, PWA behavior, and troubleshooting in docs/operations.md
+- [ ] T055 [P] Configure CI to run module verification, changed-module tests, PostgreSQL integration tests, and applicable Playwright journeys in .github/workflows/verify.yml
+- [ ] T056 [P] Reconcile architecture and domain documentation with final module APIs, migrations, and event boundaries in docs/architecture.md and docs/architecture/module-boundaries.md
+- [ ] T057 Run the quickstart scenarios and full Maven verification, then record any required operational corrections in specs/001-initial-shopping-list/quickstart.md
+- [ ] T058 Verify every migration has one owner, no cross-module foreign keys remain, all Use Cases expose one public `execute` operation, and the working tree contains no generated or sensitive files in src/main/resources/application.yml and .gitignore
+
+---
+
+## Dependencies and Execution Order
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)**: Starts immediately and establishes the technology, documentation, and repository rules.
-- **Foundational (Phase 2)**: Depends on setup and blocks story implementation.
-- **US3 (Phase 3)**: Starts after foundational work and creates the independently usable list-management slice.
-- **US1 (Phase 4)**: Depends on US3 because its independent journey requires selecting a list.
-- **US2 (Phase 5)**: Depends on US1 because it operates on created shopping items.
-- **US4 (Phase 6)**: Depends on US2 because a confirmed purchase produces reusable history.
-- **US5 (Phase 7)**: Depends on US1, US2, and US3 because it applies collaboration to confirmed list and item changes.
-- **Final verification (Phase 8)**: Depends on the desired story slices; it does not defer slice documentation.
+- **Setup (Phase 1)** has no dependencies.
+- **Foundational boundaries (Phase 2)** depend on setup and block all story work.
+- **US3** establishes a usable list capability and must precede **US1**, which needs a selected list.
+- **US1** supplies concrete items for **US2**.
+- **US2** supplies purchase behavior for **US4** and confirmed item mutations for **US5**.
+- **US4** and **US5** can proceed in parallel after US2.
+- **Polish** depends on all desired stories.
 
 ### User Story Dependency Graph
 
 ```mermaid
 flowchart LR
-    F[Foundational] --> US3[US3: Manage lists]
-    US3 --> US1[US1: Add needs]
-    US1 --> US2[US2: Shop clear list]
-    US2 --> US4[US4: Reuse catalog and history]
-    US3 --> US5[US5: Collaborate safely]
-    US1 --> US5
-    US2 --> US5
+    F[Foundational boundaries] --> US3[US3 Manage lists]
+    US3 --> US1[US1 Add need]
+    US1 --> US2[US2 Shop clear list]
+    US2 --> US4[US4 Reuse history]
+    US2 --> US5[US5 Collaborate safely]
 ```
 
-### Within Each User Story
+### Parallel Opportunities
 
-- Write the listed Given/When/Then behavioral tests first and observe their initial failure.
-- Implement focused business-module behavior and persistence, not broad shared-layer abstractions.
-- Connect behavior to the Vaadin UI, then pass the listed integration and mobile end-to-end tests.
-- Update the slice documentation and Mermaid source with the behavior before creating a cohesive Conventional Commit.
-- Keep the branch short-lived and current with `trunk`; integrate linearly by rebase-and-merge or squash-and-merge, never a merge commit.
+- T004-T006 prepare independent migration-owner locations in parallel, then T007 joins them.
+- T012-T015 can proceed in parallel after the foundational APIs exist.
+- Within each story, test tasks marked `[P]` target separate test files and may proceed in parallel.
+- US4 and US5 may be staffed in parallel after US2 is complete.
 
-## Parallel Opportunities
+## Parallel Examples
 
-- `T003` through `T008` can proceed in parallel after `T001` and `T002`.
-- `T010` through `T016` can proceed in parallel after `T009`, except where code naturally consumes another module's API.
-- In **US3**, `T017` through `T020` can proceed in parallel before the application service and UI integration.
-- In **US1**, `T024` through `T028` can proceed in parallel before parsing and orchestration integrate them.
-- In **US2**, `T034` through `T036` and `T038` can proceed in parallel before detail-view integration.
-- In **US4**, `T041` through `T044` can proceed in parallel before confirmed history recording and UI integration.
-- In **US5**, `T049` through `T052` can proceed in parallel before transaction, publication, and view wiring converge.
-
-## Parallel Example: User Story 5
+### User Story 3
 
 ```text
-Task: "Add Given/When/Then application tests in src/test/java/dev/casteels/plukk/collaboration/SharedListCollaborationApplicationTest.java"
-Task: "Add PostgreSQL concurrency tests in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemConcurrencyIntegrationTest.java"
-Task: "Add dual-session mobile coverage in src/test/java/dev/casteels/plukk/e2e/SharedShoppingListCollaborationE2ETest.java"
-Task: "Implement confirmed change publication channels in src/main/java/dev/casteels/plukk/collaboration/ShoppingListChangePublisher.java"
+Task: "Add list Use Case behavior tests in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationTest.java"
+Task: "Add list PostgreSQL tests in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListPersistenceIntegrationTest.java"
+Task: "Add list Playwright coverage in src/test/java/dev/casteels/plukk/e2e/ShoppingListManagementE2ETest.java"
+```
+
+### User Story 2
+
+```text
+Task: "Add item Use Case tests in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemUseCaseTest.java"
+Task: "Add item PostgreSQL tests in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemPersistenceIntegrationTest.java"
+Task: "Add item Playwright coverage in src/test/java/dev/casteels/plukk/e2e/ShoppingListInteractionE2ETest.java"
+```
+
+### User Stories 4 and 5
+
+```text
+Task: "Implement household-wide history in src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryRepository.java"
+Task: "Implement confirmed change delivery in src/main/java/dev/casteels/plukk/collaboration/ShoppingListChangeBroadcaster.java"
 ```
 
 ## Implementation Strategy
 
 ### MVP First
 
-1. Complete Setup and Foundational phases, including the `trunk` workflow and architecture diagrams.
-2. Deliver US3 with its tests and list-management documentation as a small, linear `trunk` increment.
-3. Deliver US1 with parser, persistence, mobile behavior, and shopping-input documentation.
-4. Validate list management plus confirmed, duplicate-safe fast item addition as the smallest coherent MVP.
+1. Complete Phases 1 and 2.
+2. Deliver and validate US3, then US1.
+3. Stop after US1 and prove list creation plus supported free-text addition on a mobile viewport.
 
 ### Incremental Delivery
 
-1. US3 establishes secure household list management.
-2. US1 makes a selected list useful through fast, reliable addition.
-3. US2 supports shopping trips with reversible, clear item states.
-4. US4 reduces repeat entry through catalog search and recent needs.
-5. US5 adds trusted shared updates and degraded-connectivity behavior, preserving latest-confirmed-wins.
-
-### Suggested MVP Scope
-
-The smallest coherent MVP is **Phase 1 + Phase 2 + US3 + US1**. The work remains split into cohesive, independently testable vertical-slice commits integrated linearly into `trunk`.
+1. Add US2 to make the list practical during a shopping trip.
+2. Add US4 for household-wide reuse after purchase behavior is durable.
+3. Add US5 after all mutations have defined confirmed state.
+4. Complete cross-cutting verification before release.
 
 ## Notes
 
-- All task lines use the required checkbox, sequential ID, optional `[P]`, story label for story work, and exact path format.
-- Task-level documentation is deliberately embedded in every user-story slice; Phase 8 checks consistency and operations rather than creating the missing product documentation.
-- The concurrency implementation is explicitly required to serialize or otherwise order confirmed same-item mutations. Optimistic locking is acceptable only if it transparently retries/reapplies so the latest confirmed mutation succeeds and wins; rejection or silently discarding the later confirmed change violates FR-015.
+- Expected validation and business-rule failures return Notification outcomes; unexpected technical
+  failures remain exceptions and operator-visible.
+- Do not add a separate SPA, offline mutation queue, background-job system, guest invitation flow,
+  or cross-module persistence shortcut.
+- Each state-owning capability must retain its own migrations, persistence adapter, and PostgreSQL
+  integration evidence.
