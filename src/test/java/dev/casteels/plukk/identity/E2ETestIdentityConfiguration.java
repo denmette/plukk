@@ -1,13 +1,15 @@
 package dev.casteels.plukk.identity;
 
-import dev.casteels.plukk.identity.api.AuthenticatedSubject;
-import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
-import dev.casteels.plukk.household.api.AuthorizedHouseholdUser.HouseholdUserAccess;
-import dev.casteels.plukk.household.api.AuthorizedHouseholdUser.Role;
 import java.util.Optional;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
+import dev.casteels.plukk.household.api.AuthorizedHouseholdUser.HouseholdUserAccess;
+import dev.casteels.plukk.household.api.AuthorizedHouseholdUser.Role;
+import dev.casteels.plukk.identity.api.AuthenticatedSubject;
 
 /**
  * E2E test identity configuration for Testcontainers and Playwright tests.

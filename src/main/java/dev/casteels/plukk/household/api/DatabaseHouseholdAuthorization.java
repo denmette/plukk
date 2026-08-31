@@ -1,10 +1,12 @@
 package dev.casteels.plukk.household.api;
 
-import dev.casteels.plukk.identity.api.AuthenticatedSubject;
 import java.util.Optional;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
+
+import dev.casteels.plukk.identity.api.AuthenticatedSubject;
 
 /**
  * Database implementation of {@link AuthorizedHouseholdUser}.

@@ -1,27 +1,24 @@
 package dev.casteels.plukk.household;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import dev.casteels.plukk.PlukkApplication;
-import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
-import dev.casteels.plukk.household.api.AuthorizedHouseholdUser.HouseholdUserAccess;
-import dev.casteels.plukk.household.api.AuthorizedHouseholdUser.Role;
-import dev.casteels.plukk.identity.api.AuthenticatedSubject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import dev.casteels.plukk.PlukkApplication;
+import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
+import dev.casteels.plukk.household.api.AuthorizedHouseholdUser.Role;
+import dev.casteels.plukk.identity.api.AuthenticatedSubject;
 
 /**
  * Integration tests for household-owned role-aware authorization.

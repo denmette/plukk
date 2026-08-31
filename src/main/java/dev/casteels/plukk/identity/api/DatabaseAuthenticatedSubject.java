@@ -1,6 +1,7 @@
 package dev.casteels.plukk.identity.api;
 
 import java.util.Optional;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
