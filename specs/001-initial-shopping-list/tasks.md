@@ -84,19 +84,19 @@ description: "Task list for implementing the Initial Shopping List feature"
 
 ### Tests for User Story 1
 
-- [ ] T024 [P] [US1] Add Given/When/Then parser behavior tests for supported quantities, units, multipliers, packages, ambiguous input, and reformulation feedback in src/test/java/dev/casteels/plukk/shopping/input/ShoppingInputParserTest.java
-- [ ] T025 [P] [US1] Add PostgreSQL Testcontainers tests for confirmed item creation, exact-active duplicate focusing, and custom-product fallback in src/test/java/dev/casteels/plukk/shopping/input/AddShoppingNeedIntegrationTest.java
-- [ ] T026 [P] [US1] Add Playwright mobile-viewport coverage for supported input, custom-product creation, confirmation-only feedback, and failed parsing in src/test/java/dev/casteels/plukk/e2e/AddShoppingNeedE2ETest.java
+- [X] T024 [P] [US1] Add Given/When/Then parser behavior tests for supported quantities, units, multipliers, packages, ambiguous input, and reformulation feedback in src/test/java/dev/casteels/plukk/shopping/input/ShoppingInputParserTest.java
+- [X] T025 [P] [US1] Add PostgreSQL Testcontainers tests for confirmed item creation, exact-active duplicate focusing, and custom-product fallback in src/test/java/dev/casteels/plukk/shopping/input/AddShoppingNeedIntegrationTest.java
+- [X] T026 [P] [US1] Add Playwright mobile-viewport coverage for supported input, custom-product creation, confirmation-only feedback, and failed parsing in src/test/java/dev/casteels/plukk/e2e/AddShoppingNeedE2ETest.java
 
 ### Implementation for User Story 1
 
-- [ ] T027 [P] [US1] Implement explicit catalog product and fixed-category persistence mappings with household-scoped custom products in src/main/java/dev/casteels/plukk/catalog/product/CatalogProduct.java
-- [ ] T028 [P] [US1] Implement the concrete shopping-item aggregate, normalized active-item identity, and confirmed add state in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItem.java
-- [ ] T029 [US1] Implement one-supported-interpretation parsing and user-safe reformulation results in src/main/java/dev/casteels/plukk/shopping/input/ShoppingInputParser.java
-- [ ] T030 [US1] Implement authorized add-need orchestration, persisted duplicate detection that keeps an exact active match unchanged, and local custom-product creation in src/main/java/dev/casteels/plukk/shopping/input/AddShoppingNeedApplicationService.java
-- [ ] T031 [US1] Implement the one-handed text-entry interaction and fixed-category custom-product dialog in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java
-- [ ] T032 [US1] Integrate confirmation-only add feedback, duplicate-item focus, and safe unexpected-error handling in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
-- [ ] T033 [US1] Document supported input grammar, accepted examples, custom-product fallback, duplicate behavior, and a Mermaid parse-decision flowchart in docs/domain/shopping-input.md
+- [X] T027 [P] [US1] Implement explicit catalog product and fixed-category persistence mappings with household-scoped custom products in src/main/java/dev/casteels/plukk/catalog/product/CatalogProduct.java
+- [X] T028 [P] [US1] Implement the concrete shopping-item aggregate, normalized active-item identity, and confirmed add state in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItem.java
+- [X] T029 [US1] Implement one-supported-interpretation parsing and user-safe reformulation results in src/main/java/dev/casteels/plukk/shopping/input/ShoppingInputParser.java
+- [X] T030 [US1] Implement authorized add-need orchestration, persisted duplicate detection that keeps an exact active match unchanged, and local custom-product creation in src/main/java/dev/casteels/plukk/shopping/input/AddShoppingNeedApplicationService.java
+- [X] T031 [US1] Implement the one-handed text-entry interaction and fixed-category custom-product dialog in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java
+- [X] T032 [US1] Integrate confirmation-only add feedback, duplicate-item focus, and safe unexpected-error handling in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
+- [X] T033 [US1] Document supported input grammar, accepted examples, custom-product fallback, duplicate behavior, and a Mermaid parse-decision flowchart in docs/domain/shopping-input.md
 
 **Checkpoint**: A member can quickly add reliable, confirmed shopping needs without accidental duplicates or silent interpretation. The slice remains usable with documentation and tests integrated before its cohesive Conventional Commit reaches `trunk`.
 
