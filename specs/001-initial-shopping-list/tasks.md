@@ -31,7 +31,7 @@ module remains one cohesive capability; `shopping.list`, `shopping.input`, `shop
 
 - [X] T001 Verify stable Java, Spring Boot, Vaadin, Spring Modulith, Testcontainers, and Playwright versions and record the validated baseline in README.md
 - [X] T002 [P] Configure the Maven verification lifecycle for JUnit, Testcontainers, Spring Modulith, and Playwright Java in pom.xml
-- [ ] T003 [P] Document the production Authentik variables and isolated development/test identity profiles in README.md
+- [X] T003 [P] Document the production Authentik variables and isolated development/test identity profiles in README.md
 
 ---
 
@@ -48,13 +48,13 @@ failures return Notifications.
 - [X] T005 [P] Move fixed category and starter-product schema and seed data into the catalog-owned Flyway location in src/main/resources/db/migration/catalog/V1__catalog_and_categories.sql
 - [X] T006 [P] Move shopping-list, item, active-identity, and history schema into the shopping-owned Flyway location in src/main/resources/db/migration/shopping/V1__shopping_lists_items_and_history.sql
 - [X] T007 Remove superseded shared migrations and configure the three module-owned Flyway locations in src/main/resources/db/migration/V1__initial_shopping_schema.sql, src/main/resources/db/migration/V2__seed_categories_and_catalog.sql, and src/main/resources/application.yml
-- [ ] T008 Define explicit Spring Modulith APIs and allowed dependencies in src/main/java/dev/casteels/plukk/identity/package-info.java, src/main/java/dev/casteels/plukk/household/package-info.java, src/main/java/dev/casteels/plukk/catalog/package-info.java, src/main/java/dev/casteels/plukk/shopping/package-info.java, src/main/java/dev/casteels/plukk/collaboration/package-info.java, and src/main/java/dev/casteels/plukk/shared/package-info.java
-- [ ] T009 Create the framework-independent authenticated-subject API and keep Spring Security/OIDC extraction inside identity in src/main/java/dev/casteels/plukk/identity/api/AuthenticatedSubject.java and src/main/java/dev/casteels/plukk/identity/DatabaseAuthenticatedSubject.java
-- [ ] T010 Create the household-owned role-aware authorization API for active OWNER and MEMBER access, with GUEST denial, in src/main/java/dev/casteels/plukk/household/api/AuthorizedHouseholdUser.java and src/main/java/dev/casteels/plukk/household/DatabaseHouseholdAuthorization.java
-- [ ] T011 Add isolated development and test identity configurations that preserve household authorization and cannot activate in production in src/main/java/dev/casteels/plukk/identity/DevelopmentIdentityConfiguration.java and src/test/resources/application-e2e.yml
-- [ ] T012 [P] Strengthen module and layer verification for public APIs, forbidden cross-module persistence access, and Use Case-only orchestration in src/test/java/dev/casteels/plukk/architecture/ModulithArchitectureTest.java and src/test/java/dev/casteels/plukk/architecture/UseCaseArchitectureTest.java
-- [ ] T013 [P] Add PostgreSQL Testcontainers coverage for owned household data and OWNER/MEMBER/GUEST authorization through the household API in src/test/java/dev/casteels/plukk/household/HouseholdAuthorizationIntegrationTest.java
-- [ ] T014 Make Notification issue codes and successful outcomes the shared contract for expected user-correctable failures in src/main/java/dev/casteels/plukk/shared/notification/Notification.java and src/main/java/dev/casteels/plukk/shared/notification/NotificationIssue.java
+- [X] T008 Define explicit Spring Modulith APIs and allowed dependencies in src/main/java/dev/casteels/plukk/identity/package-info.java, src/main/java/dev/casteels/plukk/household/package-info.java, src/main/java/dev/casteels/plukk/catalog/package-info.java, src/main/java/dev/casteels/plukk/shopping/package-info.java, src/main/java/dev/casteels/plukk/collaboration/package-info.java, and src/main/java/dev/casteels/plukk/shared/package-info.java
+- [X] T009 Create the framework-independent authenticated-subject API and keep Spring Security/OIDC extraction inside identity in src/main/java/dev/casteels/plukk/identity/api/AuthenticatedSubject.java and src/main/java/dev/casteels/plukk/identity/DatabaseAuthenticatedSubject.java
+- [X] T010 Create the household-owned role-aware authorization API for active OWNER and MEMBER access, with GUEST denial, in src/main/java/dev/casteels/plukk/household/api/AuthorizedHouseholdUser.java and src/main/java/dev/casteels/plukk/household/DatabaseHouseholdAuthorization.java
+- [X] T011 Add isolated development and test identity configurations that preserve household authorization and cannot activate in production in src/main/java/dev/casteels/plukk/identity/DevelopmentIdentityConfiguration.java and src/test/resources/application-e2e.yml
+- [X] T012 [P] Strengthen module and layer verification for public APIs, forbidden cross-module persistence access, and Use Case-only orchestration in src/test/java/dev/casteels/plukk/architecture/ModulithArchitectureTest.java and src/test/java/dev/casteels/plukk/architecture/UseCaseArchitectureTest.java
+- [X] T013 [P] Add PostgreSQL Testcontainers coverage for owned household data and OWNER/MEMBER/GUEST authorization through the household API in src/test/java/dev/casteels/plukk/household/HouseholdAuthorizationIntegrationTest.java
+- [X] T014 Make Notification issue codes and successful outcomes the shared contract for expected user-correctable failures in src/main/java/dev/casteels/plukk/shared/notification/Notification.java and src/main/java/dev/casteels/plukk/shared/notification/NotificationIssue.java
 - [ ] T015 [P] Verify the production Authentik route, isolated test identity, CSRF protection, and role denial without globally disabling security in src/test/java/dev/casteels/plukk/identity/IdentityAndPersistenceIntegrationTest.java
 
 ---

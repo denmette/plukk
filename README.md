@@ -42,3 +42,48 @@ environment variables when using an external PostgreSQL instance or Authentik pr
 
 Run `./mvnw verify` with Docker running to execute the PostgreSQL Testcontainers integration suite
 and Spring Modulith architecture verification.
+
+## Production Identity Configuration
+
+Plukk authenticates users through an external Authentik OIDC provider. The following environment
+variables configure the connection:
+
+### Required Authentik Environment Variables
+
+```
+PLUKK_OIDC_CLIENT_ID              # Client ID registered in Authentik for this deployment
+PLUKK_OIDC_CLIENT_SECRET          # Client secret registered in Authentik (keep secure)
+PLUKK_OIDC_AUTHORIZATION_URI      # Authentik authorization endpoint (e.g., https://auth.example.com/application/o/authorize/)
+PLUKK_OIDC_TOKEN_URI              # Authentik token endpoint (e.g., https://auth.example.com/application/o/token/)
+PLUKK_OIDC_USER_INFO_URI          # Authentik userinfo endpoint (e.g., https://auth.example.com/application/o/userinfo/)
+PLUKK_OIDC_JWK_SET_URI            # Authentik JWKS endpoint (e.g., https://auth.example.com/application/o/jwks/)
+PLUKK_SECURITY_ALLOWED_CLOCK_SKEW # Maximum clock skew for token validation (default: PT30S)
+```
+
+### Authentik Setup
+
+1. In Authentik, create an OAuth2/OIDC provider and application
+2. Configure the redirect URI as `https://your-domain.com/login/oauth2/code/authentik`
+3. Request scopes: `openid`, `profile`, `email`
+4. Record the client ID and secret
+5. Set the six OIDC endpoint URIs from your Authentik instance
+
+### Development and Test Identity
+
+Development and test environments use isolated identity profiles that cannot activate in
+production. These profiles:
+
+- Provide built-in test users without requiring external Authentik
+- Allow local/CI testing without Authentik credentials
+- Are explicitly disabled in production deployments
+- Preserve household authorization rules during testing
+
+**Development Profile** (`-Dspring.profiles.active=dev`):
+- Provides local test identity with hardcoded user subject and household ID
+- Useful for rapid iteration during feature development
+- Requires no Authentik access
+
+**Test Profile** (`application-e2e.yml`):
+- Isolated identity configuration for Testcontainers and Playwright tests
+- Provides repeatable test users with predictable household access
+- Cannot be activated in production by configuration guard

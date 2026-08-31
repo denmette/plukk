@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
         displayName = "Household",
-        allowedDependencies = {"identity", "shared"}
+        allowedDependencies = {"identity::api", "shared"}
 )
 package dev.casteels.plukk.household;

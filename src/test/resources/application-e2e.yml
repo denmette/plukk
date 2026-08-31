@@ -1,0 +1,24 @@
+# Test/E2E Profile Configuration
+# Used by Testcontainers PostgreSQL integration tests and Playwright end-to-end coverage
+# Provides isolated test identity without requiring Authentik
+# Cannot be activated in production
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          authentik:
+            # Test-only dummy credentials - never used in actual OIDC flow
+            client-id: test-client-id
+            client-secret: test-client-secret
+        provider:
+          authentik:
+            # Test-only dummy endpoints - bypassed by E2ETestIdentityConfiguration
+            authorization-uri: https://localhost:9999/test
+            token-uri: https://localhost:9999/test
+            user-info-uri: https://localhost:9999/test
+            jwk-set-uri: https://localhost:9999/test
+
+# Testcontainers and Playwright may add additional test-specific configurations
+# when needed (e.g., test database URLs, disable security features, etc.)
