@@ -65,7 +65,7 @@ class ShoppingNeedRepository {
 
     Optional<String> findProductName(long householdId, long productId) {
         return jdbc.sql("SELECT name FROM catalog_product WHERE id = :productId AND household_id = :householdId")
-                .param("productId", productId).query(String.class).optional();
+                .param("productId", productId).param("householdId", householdId).query(String.class).optional();
     }
 
     private String normalized(String value) {

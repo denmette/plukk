@@ -29,6 +29,7 @@ class AddShoppingNeedIntegrationTest {
     @Autowired private CreateShoppingListUseCase createList;
     @Autowired private AddShoppingNeedUseCase addNeed;
     @Autowired private CreateCustomProductAndAddShoppingNeedUseCase createCustomProduct;
+    @Autowired private FindCatalogProductNameUseCase findProductName;
 
     @DynamicPropertySource
     static void givenPostgreSqlContainer_whenContextStarts_thenConfigureDatasource(DynamicPropertyRegistry registry) {
@@ -90,6 +91,14 @@ class AddShoppingNeedIntegrationTest {
 
         assertThat(result).isInstanceOf(ShoppingNeedOutcome.Confirmed.class);
         assertThat(jdbc.sql("SELECT COUNT(*) FROM catalog_product WHERE household_id = 1 AND normalized_name = 'tofu' AND origin = 'CUSTOM'").query(Integer.class).single()).isEqualTo(1);
+    }
+
+    @Test
+    void givenHouseholdCatalogProduct_whenFindingItsName_thenReturnTheProductName() {
+        long productId = jdbc.sql("SELECT id FROM catalog_product WHERE household_id = 1 AND name = 'Kip'")
+                .query(Long.class).single();
+
+        assertThat(findProductName.execute(productId)).isEqualTo("Kip");
     }
 
     @Test
