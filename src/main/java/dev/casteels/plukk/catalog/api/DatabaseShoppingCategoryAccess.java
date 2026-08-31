@@ -3,7 +3,6 @@ package dev.casteels.plukk.catalog.api;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
  * Categories are fixed and belong to the deployment's household.
  */
 @Component
-@Profile("!e2e")
 final class DatabaseShoppingCategoryAccess implements ShoppingCategoryAccess {
 
     private final JdbcClient jdbcClient;

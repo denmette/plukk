@@ -124,16 +124,16 @@ it, removes it, and receives Notification feedback for a correctable missing-ite
 
 ### Tests for User Story 2
 
-- [ ] T031 [P] [US2] Add public-Use-Case tests for grouped sections, purchase, restore, removal, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemUseCaseTest.java
-- [ ] T032 [P] [US2] Add PostgreSQL Testcontainers tests for reversible item state, category ordering, removal, and household authorization in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemPersistenceIntegrationTest.java
-- [ ] T033 [P] [US2] Add Playwright mobile coverage for grouped active and purchased rendering, purchase, restore, and removal in src/test/java/dev/casteels/plukk/e2e/ShoppingListInteractionE2ETest.java
+- [X] T031 [P] [US2] Add public-Use-Case tests for grouped sections, purchase, restore, removal, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemUseCaseTest.java
+- [X] T032 [P] [US2] Add PostgreSQL Testcontainers tests for reversible item state, category ordering, removal, and household authorization in src/test/java/dev/casteels/plukk/shopping/item/ShoppingItemPersistenceIntegrationTest.java
+- [X] T033 [P] [US2] Add Playwright mobile coverage for grouped active and purchased rendering, purchase, restore, and removal in src/test/java/dev/casteels/plukk/e2e/ShoppingListInteractionE2ETest.java
 
 ### Implementation for User Story 2
 
-- [ ] T034 [US2] Implement shopping-owned item domain state and persistence operations for grouped reads and reversible mutations in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItem.java, src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemRepository.java, and src/main/java/dev/casteels/plukk/shopping/item/ShoppingListSection.java
-- [ ] T035 [US2] Implement one-operation item Use Cases with Notification-bearing results in src/main/java/dev/casteels/plukk/shopping/item/GetShoppingListSectionsUseCase.java, src/main/java/dev/casteels/plukk/shopping/item/PurchaseShoppingItemUseCase.java, src/main/java/dev/casteels/plukk/shopping/item/RestoreShoppingItemUseCase.java, and src/main/java/dev/casteels/plukk/shopping/item/RemoveShoppingItemUseCase.java
-- [ ] T036 [US2] Render mobile-first category sections, touch targets, purchased state, and Use Case feedback in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java and src/main/frontend/themes/plukk/styles.css
-- [ ] T037 [US2] Document item state transitions and grouped-list behavior in docs/domain/shopping-items.md and specs/001-initial-shopping-list/contracts/ui-behavior.md
+- [X] T034 [US2] Implement shopping-owned item domain state and persistence operations for grouped reads and reversible mutations in src/main/java/dev/casteels/plukk/shopping/item/ShoppingItem.java, src/main/java/dev/casteels/plukk/shopping/item/ShoppingItemRepository.java, and src/main/java/dev/casteels/plukk/shopping/item/ShoppingListSection.java
+- [X] T035 [US2] Implement one-operation item Use Cases with Notification-bearing results in src/main/java/dev/casteels/plukk/shopping/item/GetShoppingListSectionsUseCase.java, src/main/java/dev/casteels/plukk/shopping/item/PurchaseShoppingItemUseCase.java, src/main/java/dev/casteels/plukk/shopping/item/RestoreShoppingItemUseCase.java, and src/main/java/dev/casteels/plukk/shopping/item/RemoveShoppingItemUseCase.java
+- [X] T036 [US2] Render mobile-first category sections, touch targets, purchased state, and Use Case feedback in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java and src/main/frontend/themes/plukk/styles.css
+- [X] T037 [US2] Document item state transitions and grouped-list behavior in docs/domain/shopping-items.md and specs/001-initial-shopping-list/contracts/ui-behavior.md
 
 **Checkpoint**: The list is practical in a store and item mutations are independently tested
 behavior rather than UI-side state changes.

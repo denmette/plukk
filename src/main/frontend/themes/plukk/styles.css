@@ -25,3 +25,12 @@ body {
   padding: 1.5rem;
   box-shadow: 0 1rem 2.5rem rgba(31, 41, 51, 0.12);
 }
+
+.shopping-item-purchased {
+  opacity: 0.55;
+}
+
+.shopping-item-purchased span {
+  text-decoration: line-through;
+}
+

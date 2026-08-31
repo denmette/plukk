@@ -1,0 +1,127 @@
+package dev.casteels.plukk.e2e;
+
+import java.nio.file.Path;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.WaitForSelectorState;
+import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
+
+import dev.casteels.plukk.PlukkApplication;
+import dev.casteels.plukk.identity.HouseholdMemberAccess;
+
+@SpringBootTest(
+        classes = {PlukkApplication.class, ShoppingListInteractionE2ETest.E2eConfiguration.class},
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("e2e")
+@Testcontainers
+class ShoppingListInteractionE2ETest {
+
+    @Container static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
+
+    @Autowired private JdbcClient jdbc;
+    @LocalServerPort private int port;
+    private Playwright playwright;
+    private Browser browser;
+    private Page page;
+    private long listId;
+
+    @DynamicPropertySource
+    static void givenPostgreSqlContainer_whenContextStarts_thenConfigureDatasource(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.docker.compose.enabled", () -> false);
+    }
+
+    @BeforeEach
+    void givenMobileMemberAndEmptyList_whenInteractionJourneyStarts_thenOpenMobileBrowser() {
+        jdbc.sql("DELETE FROM shopping_list").update();
+        jdbc.sql("DELETE FROM household_member WHERE external_subject = 'interaction-member'").update();
+        jdbc.sql("INSERT INTO household_member (household_id, external_subject, display_name, role) VALUES (1, 'interaction-member', 'Interaction Member', 'MEMBER')").update();
+        listId = jdbc.sql("INSERT INTO shopping_list (household_id, name) VALUES (1, 'Groceries') RETURNING id").query(Long.class).single();
+        playwright = Playwright.create();
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true)
+                .setExecutablePath(Path.of("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")));
+        page = browser.newPage(new Browser.NewPageOptions().setViewportSize(390, 844));
+        page.navigate("http://localhost:" + port + "/lists/" + listId);
+    }
+
+    @AfterEach
+    void givenMobileBrowser_whenInteractionJourneyCompletes_thenCloseBrowser() {
+        if (browser != null) browser.close();
+        if (playwright != null) playwright.close();
+    }
+
+    @Test
+    void givenMobileMember_whenInteractingWithGroupedList_thenPurchaseRestoreAndRemoveWork() {
+        page.getByLabel("Add a need").fill("kip 1");
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Add")).click();
+        page.getByText("Kip - 1", new Page.GetByTextOptions().setExact(true)).waitFor();
+        page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Meat")).waitFor();
+
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Purchase")).click();
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Restore")).waitFor();
+
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Restore")).click();
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Purchase")).waitFor();
+
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Remove")).click();
+        page.getByText("Kip - 1", new Page.GetByTextOptions().setExact(true))
+                .waitFor(new Locator.WaitForOptions().setState(WaitForSelectorState.DETACHED));
+
+        assertThat(page.evaluate("window.innerWidth")).isEqualTo(390);
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class E2eConfiguration {
+        @Bean
+        SecurityFilterChain e2eSecurityFilterChain(HttpSecurity http) throws Exception {
+            http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer
+                    .enableNavigationAccessControl(false)
+                    .enableAuthorizedRequestsConfiguration(false));
+            http.addFilterBefore((request, response, chain) -> {
+                SecurityContextHolder.getContext().setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
+                        "e2e-member", "not-used", AuthorityUtils.createAuthorityList("ROLE_USER")));
+                try { chain.doFilter(request, response); } finally { SecurityContextHolder.clearContext(); }
+            }, AnonymousAuthenticationFilter.class);
+            http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+            return http.build();
+        }
+
+        @Bean
+        @Primary
+        HouseholdMemberAccess e2eHouseholdMemberAccess() {
+            return () -> Optional.of(new HouseholdMemberAccess.ActiveHouseholdMember(1L, 1L, "e2e-member", "E2E Member"));
+        }
+    }
+}

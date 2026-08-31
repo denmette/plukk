@@ -3,7 +3,6 @@ package dev.casteels.plukk.catalog.api;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
  * Uses case-insensitive normalized name matching and enforces single household per deployment.
  */
 @Component
-@Profile("!e2e")
 final class DatabaseCatalogProductAccess implements CatalogProductAccess {
 
     private final JdbcClient jdbcClient;
