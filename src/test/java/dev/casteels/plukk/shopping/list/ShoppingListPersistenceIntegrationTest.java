@@ -1,7 +1,7 @@
 package dev.casteels.plukk.shopping.list;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import dev.casteels.plukk.PlukkApplication;
 import org.junit.jupiter.api.AfterEach;
@@ -21,12 +21,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(classes = PlukkApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 class ShoppingListPersistenceIntegrationTest {
-
-    @Container
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
-
-    @Autowired private JdbcClient jdbcClient;
-    @Autowired private ShoppingListApplicationService lists;
+    @Container static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
+    @Autowired private JdbcClient jdbc;
+    @Autowired private CreateShoppingListUseCase createList;
+    @Autowired private OpenShoppingListUseCase openList;
 
     @DynamicPropertySource
     static void givenPostgreSqlContainer_whenContextStarts_thenConfigureDatasource(DynamicPropertyRegistry registry) {
@@ -38,10 +36,10 @@ class ShoppingListPersistenceIntegrationTest {
 
     @BeforeEach
     void givenActiveMember_whenListBehaviorRuns_thenAuthenticateMember() {
-        jdbcClient.sql("DELETE FROM shopping_list").update();
-        jdbcClient.sql("DELETE FROM household_member WHERE external_subject = 'lists-member'").update();
-        jdbcClient.sql("DELETE FROM household WHERE id = 2").update();
-        jdbcClient.sql("INSERT INTO household_member (household_id, external_subject, display_name, role) VALUES (1, 'lists-member', 'Lists Member', 'MEMBER')").update();
+        jdbc.sql("DELETE FROM shopping_list").update();
+        jdbc.sql("DELETE FROM household_member WHERE external_subject = 'lists-member'").update();
+        jdbc.sql("DELETE FROM household WHERE id = 2").update();
+        jdbc.sql("INSERT INTO household_member (household_id, external_subject, display_name, role) VALUES (1, 'lists-member', 'Lists Member', 'MEMBER')").update();
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("lists-member", "unused", "ROLE_USER"));
     }
 
@@ -51,25 +49,15 @@ class ShoppingListPersistenceIntegrationTest {
     }
 
     @Test
-    void givenAuthenticatedMember_whenManagingLists_thenOnlyOwnedListsChange() {
-        ShoppingList groceries = lists.create("Groceries");
-        ShoppingList pharmacy = lists.create("Pharmacy");
-
-        ShoppingList renamed = lists.rename(groceries.id(), "Weekly groceries");
-        lists.delete(pharmacy.id());
-
-        assertThat(lists.open(groceries.id()).name()).isEqualTo("Weekly groceries");
-        assertThat(renamed.name()).isEqualTo("Weekly groceries");
-        assertThat(lists.lists()).extracting(ShoppingList::name).containsExactly("Weekly groceries");
-    }
-
-    @Test
-    void givenListFromAnotherHousehold_whenMemberOpensIt_thenAccessIsRejected() {
-        jdbcClient.sql("INSERT INTO household (id, display_name) VALUES (2, 'Other household')").update();
-        Long otherListId = jdbcClient.sql("INSERT INTO shopping_list (household_id, name) VALUES (2, 'Private') RETURNING id")
+    void givenListFromAnotherHousehold_whenExecutingOpenUseCase_thenNotificationProtectsIt() {
+        jdbc.sql("INSERT INTO household (id, display_name) VALUES (2, 'Other household')").update();
+        long otherListId = jdbc.sql("INSERT INTO shopping_list (household_id, name) VALUES (2, 'Private') RETURNING id")
                 .query(Long.class).single();
 
-        assertThatThrownBy(() -> lists.open(otherListId))
-                .isInstanceOf(ShoppingListApplicationService.ShoppingListNotFoundException.class);
+        OpenShoppingListUseCase.Result result = openList.execute(otherListId);
+
+        assertThat(result.list()).isNull();
+        assertThat(result.notification().issues()).extracting("code", "message")
+                .containsExactly(tuple("shopping-list.not-found", "Shopping list not found."));
     }
 }

@@ -7,24 +7,32 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
-import dev.casteels.plukk.shopping.input.AddShoppingNeedApplicationService;
+import dev.casteels.plukk.shopping.input.AddShoppingNeedUseCase;
+import dev.casteels.plukk.shopping.input.CreateCustomProductAndAddShoppingNeedUseCase;
+import dev.casteels.plukk.shopping.input.FindShoppingCategoriesUseCase;
+import dev.casteels.plukk.shopping.input.ShoppingCategory;
 import dev.casteels.plukk.shopping.input.ShoppingInputParser;
+import dev.casteels.plukk.shopping.input.ShoppingNeedOutcome;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AddShoppingNeedComponent extends VerticalLayout {
-
     private static final Logger logger = LoggerFactory.getLogger(AddShoppingNeedComponent.class);
     private final long listId;
-    private final AddShoppingNeedApplicationService needs;
-    private final Consumer<AddShoppingNeedApplicationService.AddResult> resultHandler;
+    private final AddShoppingNeedUseCase addNeed;
+    private final CreateCustomProductAndAddShoppingNeedUseCase createCustomProduct;
+    private final FindShoppingCategoriesUseCase findCategories;
+    private final Consumer<ShoppingNeedOutcome> resultHandler;
     private final TextField input = new TextField("Add a need");
 
-    public AddShoppingNeedComponent(long listId, AddShoppingNeedApplicationService needs,
-            Consumer<AddShoppingNeedApplicationService.AddResult> resultHandler) {
+    public AddShoppingNeedComponent(long listId, AddShoppingNeedUseCase addNeed,
+            CreateCustomProductAndAddShoppingNeedUseCase createCustomProduct, FindShoppingCategoriesUseCase findCategories,
+            Consumer<ShoppingNeedOutcome> resultHandler) {
         this.listId = listId;
-        this.needs = needs;
+        this.addNeed = addNeed;
+        this.createCustomProduct = createCustomProduct;
+        this.findCategories = findCategories;
         this.resultHandler = resultHandler;
         setPadding(false);
         setSpacing(false);
@@ -43,8 +51,8 @@ public class AddShoppingNeedComponent extends VerticalLayout {
 
     private void submit() {
         try {
-            AddShoppingNeedApplicationService.AddResult result = needs.add(listId, input.getValue());
-            if (result instanceof AddShoppingNeedApplicationService.CustomProductRequired customProductRequired) {
+            ShoppingNeedOutcome result = addNeed.execute(listId, input.getValue());
+            if (result instanceof ShoppingNeedOutcome.CustomProductRequired customProductRequired) {
                 showCustomProductDialog(customProductRequired.need());
                 return;
             }
@@ -60,10 +68,10 @@ public class AddShoppingNeedComponent extends VerticalLayout {
         dialog.setHeaderTitle("Create " + need.product());
         dialog.setCloseOnEsc(true);
         dialog.setCloseOnOutsideClick(true);
-        Select<AddShoppingNeedApplicationService.Category> category = new Select<>();
+        Select<ShoppingCategory> category = new Select<>();
         category.setLabel("Category");
-        category.setItems(needs.availableCategories());
-        category.setItemLabelGenerator(AddShoppingNeedApplicationService.Category::name);
+        category.setItems(findCategories.execute());
+        category.setItemLabelGenerator(ShoppingCategory::name);
         category.setWidthFull();
         dialog.add(new Span("Choose a category for this household product."), category);
         Button create = new Button("Create product", event -> {
@@ -73,7 +81,11 @@ public class AddShoppingNeedComponent extends VerticalLayout {
                 return;
             }
             try {
-                AddShoppingNeedApplicationService.AddResult result = needs.addCustomProduct(listId, need, category.getValue().id());
+                ShoppingNeedOutcome result = createCustomProduct.execute(listId, need, category.getValue().id());
+                if (!result.notification().isSuccess()) {
+                    resultHandler.accept(result);
+                    return;
+                }
                 dialog.close();
                 input.clear();
                 resultHandler.accept(result);
@@ -88,8 +100,7 @@ public class AddShoppingNeedComponent extends VerticalLayout {
 
     private void showUnexpectedError(RuntimeException exception) {
         logger.error("Could not add a shopping need to list {}", listId, exception);
-        com.vaadin.flow.component.notification.Notification.show(
-                "The item could not be added. Please try again.", 5000,
+        com.vaadin.flow.component.notification.Notification.show("The item could not be added. Please try again.", 5000,
                 com.vaadin.flow.component.notification.Notification.Position.BOTTOM_START);
     }
 }

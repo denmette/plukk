@@ -1,7 +1,7 @@
 package dev.casteels.plukk.shopping.list;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import dev.casteels.plukk.PlukkApplication;
 import org.junit.jupiter.api.AfterEach;
@@ -21,12 +21,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(classes = PlukkApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 class ShoppingListApplicationTest {
-
-    @Container
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
-
-    @Autowired private JdbcClient jdbcClient;
-    @Autowired private ShoppingListApplicationService lists;
+    @Container static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
+    @Autowired private JdbcClient jdbc;
+    @Autowired private CreateShoppingListUseCase createList;
+    @Autowired private RenameShoppingListUseCase renameList;
+    @Autowired private OpenShoppingListUseCase openList;
+    @Autowired private DeleteShoppingListUseCase deleteList;
+    @Autowired private FindShoppingListsUseCase findLists;
 
     @DynamicPropertySource
     static void givenPostgreSqlContainer_whenContextStarts_thenConfigureDatasource(DynamicPropertyRegistry registry) {
@@ -38,9 +39,9 @@ class ShoppingListApplicationTest {
 
     @BeforeEach
     void givenActiveMember_whenListBehaviorRuns_thenAuthenticateMember() {
-        jdbcClient.sql("DELETE FROM shopping_list").update();
-        jdbcClient.sql("DELETE FROM household_member WHERE external_subject = 'application-member'").update();
-        jdbcClient.sql("INSERT INTO household_member (household_id, external_subject, display_name, role) VALUES (1, 'application-member', 'Application Member', 'MEMBER')").update();
+        jdbc.sql("DELETE FROM shopping_list").update();
+        jdbc.sql("DELETE FROM household_member WHERE external_subject = 'application-member'").update();
+        jdbc.sql("INSERT INTO household_member (household_id, external_subject, display_name, role) VALUES (1, 'application-member', 'Application Member', 'MEMBER')").update();
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("application-member", "unused", "ROLE_USER"));
     }
 
@@ -50,22 +51,26 @@ class ShoppingListApplicationTest {
     }
 
     @Test
-    void givenAuthenticatedMember_whenCreatingRenamingOpeningAndDeletingLists_thenRemainingListIsAvailable() {
-        ShoppingList groceries = lists.create("Groceries");
-        ShoppingList pharmacy = lists.create("Pharmacy");
+    void givenAuthenticatedMember_whenExecutingListUseCases_thenRemainingListIsAvailable() {
+        ShoppingList groceries = createList.execute("Groceries").list();
+        ShoppingList pharmacy = createList.execute("Pharmacy").list();
 
-        ShoppingList renamed = lists.rename(groceries.id(), "Weekly groceries");
-        ShoppingList opened = lists.open(renamed.id());
-        lists.delete(pharmacy.id());
+        RenameShoppingListUseCase.Result renamed = renameList.execute(groceries.id(), "Weekly groceries");
+        OpenShoppingListUseCase.Result opened = openList.execute(renamed.list().id());
+        DeleteShoppingListUseCase.Result deleted = deleteList.execute(pharmacy.id());
 
-        assertThat(opened.name()).isEqualTo("Weekly groceries");
-        assertThat(lists.lists()).extracting(ShoppingList::name).containsExactly("Weekly groceries");
+        assertThat(renamed.notification().isSuccess()).isTrue();
+        assertThat(opened.list().name()).isEqualTo("Weekly groceries");
+        assertThat(deleted.notification().isSuccess()).isTrue();
+        assertThat(findLists.execute()).extracting(ShoppingList::name).containsExactly("Weekly groceries");
     }
 
     @Test
-    void givenBlankListName_whenCreatingList_thenInputIsRejected() {
-        assertThatThrownBy(() -> lists.create("   "))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("A shopping list name is required.");
+    void givenBlankListName_whenExecutingCreateUseCase_thenNotificationExplainsCorrection() {
+        CreateShoppingListUseCase.Result result = createList.execute("   ");
+
+        assertThat(result.list()).isNull();
+        assertThat(result.notification().issues()).extracting("code", "message")
+                .containsExactly(tuple("shopping-list.name.required", "A shopping list name is required."));
     }
 }
