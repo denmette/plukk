@@ -70,16 +70,16 @@ household.
 
 ### Tests for User Story 3
 
-- [ ] T016 [P] [US3] Add focused public-Use-Case tests for create, find, open, rename, delete, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationTest.java
-- [ ] T017 [P] [US3] Add PostgreSQL Testcontainers tests for shopping-owned list persistence, household scoping, and deletion behavior in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListPersistenceIntegrationTest.java
-- [ ] T018 [P] [US3] Add Playwright mobile coverage for owner/member list management and guest denial in src/test/java/dev/casteels/plukk/e2e/ShoppingListManagementE2ETest.java
+- [X] T016 [P] [US3] Add focused public-Use-Case tests for create, find, open, rename, delete, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListApplicationTest.java
+- [X] T017 [P] [US3] Add PostgreSQL Testcontainers tests for shopping-owned list persistence, household scoping, and deletion behavior in src/test/java/dev/casteels/plukk/shopping/list/ShoppingListPersistenceIntegrationTest.java
+- [X] T018 [P] [US3] Add Playwright mobile coverage for owner/member list management and guest denial in src/test/java/dev/casteels/plukk/e2e/ShoppingListManagementE2ETest.java
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Refactor list Use Cases to depend only on the household authorization API and return explicit Notification-bearing results in src/main/java/dev/casteels/plukk/shopping/list/CreateShoppingListUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/FindShoppingListsUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/OpenShoppingListUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/RenameShoppingListUseCase.java, and src/main/java/dev/casteels/plukk/shopping/list/DeleteShoppingListUseCase.java
-- [ ] T020 [US3] Keep list domain rules and the shopping-owned persistence adapter internal while exposing only deliberate list result types in src/main/java/dev/casteels/plukk/shopping/list/ShoppingList.java, src/main/java/dev/casteels/plukk/shopping/list/ShoppingListRepository.java, and src/main/java/dev/casteels/plukk/shopping/list/ShoppingListMembership.java
-- [ ] T021 [US3] Update list views to call public list Use Cases and translate expected failures to Vaadin feedback in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListsView.java and src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
-- [ ] T022 [US3] Update the household-list flow and authorization documentation in docs/domain/shopping-lists.md
+- [X] T019 [US3] Refactor list Use Cases to depend only on the household authorization API and return explicit Notification-bearing results in src/main/java/dev/casteels/plukk/shopping/list/CreateShoppingListUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/FindShoppingListsUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/OpenShoppingListUseCase.java, src/main/java/dev/casteels/plukk/shopping/list/RenameShoppingListUseCase.java, and src/main/java/dev/casteels/plukk/shopping/list/DeleteShoppingListUseCase.java
+- [X] T020 [US3] Keep list domain rules and the shopping-owned persistence adapter internal while exposing only deliberate list result types in src/main/java/dev/casteels/plukk/shopping/list/ShoppingList.java, src/main/java/dev/casteels/plukk/shopping/list/ShoppingListRepository.java, and src/main/java/dev/casteels/plukk/shopping/list/ShoppingListMembership.java
+- [X] T021 [US3] Update list views to call public list Use Cases and translate expected failures to Vaadin feedback in src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListsView.java and src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
+- [X] T022 [US3] Update the household-list flow and authorization documentation in docs/domain/shopping-lists.md
 
 **Checkpoint**: List management is a usable, independently tested `shopping` slice with no direct
 identity persistence access and no expected validation exceptions.
