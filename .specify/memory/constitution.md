@@ -1,297 +1,197 @@
 <!--
 Sync Impact Report
-Version change: 1.1.0 -> 1.2.0
+Version change: 1.4.0 -> 1.4.1
 Modified principles:
-- XVII. Definition of Done -> XVII. Definition of Done
+- All principles: concise governing statements; normative intent unchanged
+Modified sections:
+- Product and Technical Constraints -> Product and Technical Constraints
+- Delivery Workflow and Quality Gates -> Delivery Workflow and Quality Gates
 Added sections:
-- XX. Repository Governance
+- None
 Removed sections:
 - None
 Follow-up TODOs:
 - None
+
+No architectural requirements were removed. Duplicate guidance was consolidated, and
+implementation-specific guidance moved to supporting documentation. Normative intent is unchanged.
 -->
 # Plukk Constitution
 
 ## Core Principles
 
 ### I. Product Identity
-Plukk is self-hosted software for one household per deployment. The project name is Plukk. The
-Java base package MUST be `dev.casteels.plukk`, and all production Java packages MUST live under
-that namespace. Placeholder package names such as `com.example` are prohibited. This principle
-keeps the codebase and product scope aligned with the intended deployment model.
+Plukk is self-hosted software for one household per deployment. Production Java packages MUST use
+`dev.casteels.plukk`; placeholder package names are prohibited. Multi-tenancy and implicit SaaS
+evolution are out of scope. This keeps product, ownership, and deployment boundaries clear.
 
 ### II. Full-Java Architecture
-Java MUST remain the primary application language. The backend and application UI MUST use Spring
-Boot and Vaadin Flow. Separate SPA frontends such as React, Angular, or Vue are out of scope.
-Client-side code is allowed only when required for browser capabilities such as PWA support,
-service workers, or degraded connectivity behavior that Vaadin cannot reasonably deliver
-server-side, and it MUST remain minimal and justified. This prevents stack sprawl and keeps the
-operational model simple.
+Java, Spring Boot, and Vaadin Flow MUST provide the application and UI. Separate SPA frontends are
+out of scope; minimal browser code is allowed only for necessary PWA or degraded-connectivity
+capabilities. This keeps the stack and operational model cohesive.
 
 ### III. Modular Monolith
-Plukk MUST be implemented as a modular monolith using Spring Modulith. Microservices are out of
-scope. Modules MUST represent business capabilities rather than technical layers, and their
-boundaries MUST be verified with Spring Modulith tests. Cross-module dependencies MUST be
-deliberate and minimal. Application events SHOULD be preferred when they materially reduce
-coupling, but asynchronous complexity MUST NOT be introduced without a documented requirement. This
-preserves maintainability without fragmenting the system prematurely.
+Plukk MUST be a Spring Modulith modular monolith, not microservices. Every independently evolving
+vertical slice MUST be a real business-capability module with an explicit public API and declared
+allowed dependencies. A module MUST expose only deliberate APIs or domain events; it MUST NOT
+access another module's internal domain objects, repositories, adapters, Use Cases, UI, or
+persistence implementation. Each module owns its application behavior, persistence changes, and
+tests, and MUST be independently testable without unrelated business modules. Automated
+architecture tests MUST verify module boundaries. The implementation guide is
+[`docs/architecture/module-boundaries.md`](../../docs/architecture/module-boundaries.md).
 
 ### IV. Simple Deployment
-Production MUST run as one stateless application container plus PostgreSQL. PostgreSQL MUST be
-usable either as a local Docker container or as an externally hosted database. Runtime
-configuration MUST come from environment variables or mounted configuration or secrets. Additional
-infrastructure such as Redis, Kafka, RabbitMQ, Elasticsearch, or Kubernetes MUST NOT be added
-without a concrete documented requirement. This keeps homelab deployment and operations practical.
+Production MUST run as one stateless application container and PostgreSQL. Configuration MUST use
+environment variables or mounted configuration or secrets. Redis, Kafka, RabbitMQ, Elasticsearch,
+Kubernetes, and comparable infrastructure require a concrete documented requirement. This keeps
+homelab operation practical.
 
 ### V. Modern Stable Technologies
-Implementation MUST use the latest stable production releases available at the time work is done.
-The preferred Java version MUST be the latest stable LTS release. Spring Boot, Spring Modulith,
-Vaadin, PostgreSQL, Playwright, Testcontainers, Flyway, Maven plugins, and comparable
-dependencies MUST use stable releases only. Alpha, beta, RC, milestone, snapshot, preview,
-experimental, and canary dependencies are prohibited unless explicitly approved. Current versions
-MUST be verified before implementation rather than recalled from memory, and major technology
-versions MUST be documented in the README. This reduces avoidable upgrade and support risk.
+Use stable production releases only. The preferred Java version MUST be the latest stable LTS;
+major technology versions MUST be verified when work is performed and recorded in the README.
+Pre-release and experimental dependencies require explicit approval. This reduces avoidable
+support risk.
 
 ### VI. Mobile-First User Experience
-The primary user experience is a smartphone used one-handed while shopping. Design MUST begin from
-approximately a 390px viewport, with larger screens treated as secondary enhancements. Core
-shopping interactions MUST have large touch targets, require as few actions as reasonably
-possible, and feel immediate when adding or checking items. Unpurchased items MUST remain visually
-dominant, and purchased items MUST stay clearly distinguishable without disappearing automatically.
-Accessibility, sufficient contrast, keyboard accessibility where relevant, and reduced-motion
-preferences MUST be respected. This keeps the product optimized for its real usage context.
+Design for approximately a 390px, one-handed smartphone viewport before larger screens. Core
+shopping actions MUST minimize effort, use accessible touch targets, remain immediate, and keep
+unpurchased and purchased items clearly distinct. Accessibility, keyboard use where relevant, and
+reduced-motion preferences are mandatory. This optimizes Plukk for its actual context of use.
 
 ### VII. Vaadin Conventions
-Standard Vaadin Flow components and patterns MUST be preferred over custom browser frameworks.
-Views MUST stay small and be composed from focused components. A generic internal UI framework MUST
-NOT be created prematurely. Business rules MUST NOT live primarily inside Vaadin views; views
-coordinate presentation and application use cases while domain and application logic remain inside
-the appropriate modules. This preserves clear separation without abandoning the chosen framework.
+Prefer standard Vaadin Flow components and focused composed views. Do not create a generic internal
+UI framework without a concrete need. Views coordinate presentation only; business rules belong in
+the owning domain and application module. This retains separation within the chosen framework.
 
 ### VIII. PWA and Degraded Connectivity
-Plukk MUST target installability as a Progressive Web App. It MUST provide a useful degraded
-experience during temporary connectivity loss. A service worker MAY cache static assets and
-appropriate read-only application data. The user MUST be told clearly when the application is
-offline or disconnected, and the application MUST NOT imply that a write succeeded unless the
-server confirmed persistence. Full offline mutation, conflict resolution, synchronization queues,
-CRDTs, and similar distributed synchronization mechanisms are out of scope for the initial MVP
-unless separately specified. This sets a reliable boundary for offline behavior.
+Plukk MUST be installable as a PWA and provide useful, clearly communicated degraded behavior
+during temporary disconnection. It MUST NOT claim a write succeeded until the server confirms it.
+Offline mutation, conflict resolution, synchronization queues, and CRDTs are out of MVP scope
+unless separately specified. This prevents misleading or unreliable shopping workflows.
 
 ### IX. Household Model
-One Plukk installation represents one household. Multi-tenancy and multiple households per
-installation are prohibited. Users MAY hold different household roles, and the domain model MUST
-support at least owner, member, and guest concepts. Guest access MAY later be limited to selected
-shopping lists. Complex invitation workflows are not required for the MVP unless explicitly
-specified. This keeps the authorization model aligned with the single-household scope.
+Each installation represents one household. The domain MUST support owner, member, and guest roles,
+with server-enforced household permissions; guest access may be limited to selected lists.
+Complex invitation workflows are out of MVP scope unless specified. This matches authorization to
+the single-household product boundary.
 
 ### X. Authentication and Authorization
-Authentication MUST use an external Authentik installation through OpenID Connect. Plukk MUST NOT
-manage user passwords. Spring Security MUST own authentication and authorization. Authentication
-state MUST be handled securely using server-side and browser session mechanisms appropriate for
-Vaadin and Spring Security. Authorization MUST be enforced server-side. Guests MUST NOT gain
-access beyond their explicitly granted permissions. Security controls such as CSRF MUST NOT be
-disabled for convenience, and secrets, tokens, session identifiers, and credentials MUST never be
-logged or committed. This treats security boundaries as product requirements rather than
-afterthoughts.
+Authentication MUST use Authentik through OpenID Connect; Plukk MUST NOT manage passwords. Spring
+Security owns authentication and server-side authorization. CSRF MUST NOT be disabled for
+convenience, and secrets, credentials, tokens, and session identifiers MUST never be logged or
+committed. This makes security a product boundary.
 
 ### XI. Persistence
-PostgreSQL is the single source of truth for persistent application data. Database schema changes
-MUST use Flyway. Production MUST NOT rely on Hibernate automatic schema creation. Persistence
-entities MUST NOT become an accidental public API. Database design MUST remain suitable for backup
-and restore using standard PostgreSQL tooling. This protects operational recoverability and schema
-discipline.
+PostgreSQL is the authoritative persistent store. Schema changes MUST use Flyway; Hibernate schema
+generation is prohibited in production. A module owns its tables, persistence adapter, and Flyway
+migrations. Cross-module foreign keys and shared-table ownership need an explicit architecture
+exception. One database and Flyway configuration are the default; independent schema or deployment
+requires an ADR. The implementation guide is
+[`docs/architecture/persistence.md`](../../docs/architecture/persistence.md).
 
-### XII. Behavioral Testing Is Part of Every Feature
-Tests are mandatory and MUST validate observable domain, application, integration-boundary, or
-user behavior rather than implementation details. Production refactoring that preserves observable
-behavior SHOULD NOT require unrelated test changes. Tests MUST NOT exist solely to increase code
-coverage; coverage MAY be measured but is not evidence of correctness. Java tests MUST use a
-Given/When/Then structure and the naming convention
-`given<Precondition>_when<Action>_then<ExpectedBehavior>`; optional Given/When/Then comments MAY
-be used when they improve readability. JUnit MUST be the test framework and AssertJ MUST be the
-assertion library. Equivalent standard JUnit assertions SHOULD NOT be used in place of AssertJ.
-Mockito MAY be used for appropriate doubles but MUST NOT mock every collaborator by default; real
-domain objects and focused fakes are preferred where practical. This makes behavior, not internal
-structure, the durable specification of the system.
-
-Test scope MUST follow the behavior under validation rather than arbitrary layer quotas. Unit tests
-SHOULD validate domain and application behavior. Integration tests MUST validate meaningful
-boundaries such as persistence, security, application integration, and infrastructure integration.
-PostgreSQL-dependent integration tests MUST use Testcontainers; H2 MUST NOT substitute for
-PostgreSQL. Spring Modulith verification tests MUST validate module boundaries and other explicit
-architectural constraints. End-to-end tests MUST use Playwright against the actual running
-application and PostgreSQL; relevant journeys MUST include a mobile viewport representative of
-Plukk's primary use. Authentication, authorization, shared-list collaboration, real-time behavior,
-and PWA, degraded-connectivity, reconnection, or offline behavior MUST receive automated
-behavioral coverage where applicable and technically practical. Tests MUST NOT target framework
-internals, trivial accessors, generated code, or behavior adequately guaranteed by the compiler or
-framework unless Plukk adds meaningful behavior around it. UnitSocializer MAY be used for unit-test
-analysis but MUST NOT become a runtime dependency or a normal test-execution requirement.
+### XII. Behavioral Testing
+Tests MUST validate observable behavior, not implementation detail or coverage targets. Java tests
+MUST use Given/When/Then and the name
+`given<Precondition>_when<Action>_then<ExpectedBehavior>`, with JUnit and AssertJ. Use
+Testcontainers for PostgreSQL-dependent integration tests and Playwright against the running
+application for applicable critical end-to-end journeys, including representative mobile viewports.
+Focused module integration tests MUST prove each slice's exposed behavior, PostgreSQL persistence,
+and applicable domain-event interactions; end-to-end tests complement, never replace, module tests.
+The implementation guide is [`docs/architecture/testing.md`](../../docs/architecture/testing.md).
 
 ### XIII. Vertical Slices
-Features MUST be implemented as vertical slices. A slice normally includes domain behavior,
-persistence, application or service behavior, UI, and automated tests. The team MUST NOT stage
-work as all database tables first, then all services, then all UI pages. The application MUST
-remain usable throughout development. This reduces integration risk and keeps progress user-visible.
+Deliver features as usable vertical slices, not horizontal stages of tables, services, and UI. A
+slice that independently evolves MUST own a coherent capability, state, Use Cases, persistence, and
+tests as a module. Shopping MUST divide into `shopping.list`, `shopping.input`, `shopping.item`,
+and `shopping.history` as their Use Cases evolve independently. This keeps delivery user-visible
+and integration risk contained.
 
 ### XIV. Domain Simplicity
-A shopping product represents a reusable catalog entry, and a shopping item represents a product
-placed on a shopping list. A shopping list MUST NOT accumulate duplicate active entries for the
-same product by accident. Quantity and optional notes MUST cover common variations. Purchased items
-MUST remain reversible so users can uncheck them. Inventory, recipes, meal planning, pricing,
-supermarket integrations, receipt scanning, barcode scanning, and AI are out of scope unless
-separately specified. This prevents domain sprawl in the MVP.
+A catalog entry is reusable; a shopping item is its list placement. A list MUST not accidentally
+contain duplicate active entries for the same product. Quantity, optional notes, and reversible
+purchases cover MVP variation. Inventory, recipes, meal planning, pricing, integrations, scanning,
+and AI are out of scope unless specified. This avoids premature domain expansion.
 
 ### XV. Scope Discipline
-Implementation MUST cover only requirements present in the active specification. The team MUST NOT
-design abstractions for hypothetical SaaS, multi-tenant, microservice, AI, analytics,
-event-streaming, or enterprise requirements. Future extensibility is desirable only when it does
-not introduce speculative engineering. This protects delivery speed and design clarity.
+Implement only the active specification. Do not introduce speculative SaaS, multi-tenant,
+microservice, AI, analytics, event-streaming, enterprise, or generalized infrastructure designs.
+Extensibility is valid only when it adds no speculative complexity. This protects delivery focus.
 
 ### XVI. Code Quality
-Code organization MUST prefer package-by-feature and module-oriented structure. Generic
-`BaseController`, `BaseService`, `BaseRepository`, and similar inheritance hierarchies are
-prohibited unless a concrete case is documented and approved. Interfaces MUST NOT be created only
-because an implementation class exists. Java code MUST favor explicit readability. Lombok MUST NOT
-be introduced without a concrete justification. Records SHOULD be used for immutable DTOs and
-value objects where appropriate. Spring and Vaadin conventions MUST be followed before introducing
-custom abstractions. This keeps the codebase legible and intention-revealing.
+Organize code by feature and module. Generic base controller, service, repository, Use Case, or
+result inheritance frameworks are prohibited without an approved concrete case. Interfaces need a
+real boundary, not an implementation counterpart. Favor explicit readable Java, appropriate
+records for immutable values, and Spring and Vaadin conventions before customization. This keeps
+the codebase legible.
 
-### XVII. Definition of Done
-A feature is done only when production code compiles; acceptance criteria are satisfied; required
-behavioral tests pass and follow the Given/When/Then naming and structure convention; AssertJ is
-used for Java assertions; relevant integration tests use Testcontainers; relevant Playwright
-end-to-end tests and Spring Modulith architecture checks pass; mobile usability, authentication,
-and authorization rules are respected; database migrations are included when required; and no
-knowingly broken placeholders or TODO implementations remain. Documentation affected by the
-feature MUST be updated, including diagrams when architectural relationships, flows, states, or
-deployment topology change, and significant architectural decisions MUST be recorded when
-required. Relevant source files MUST be tracked; generated, local-only, sensitive, and ephemeral
-files MUST be ignored; and secrets or local credentials MUST NOT be committed. Commits MUST be
-cohesive, meaningful Conventional Commits, and integration MUST preserve a buildable, testable,
-releasable, linear `trunk` history with obsolete short-lived branches removed. This definition
-prevents partial delivery from being treated as completion.
+### XVII. Use-Case Application Layer and Notifications
+Application orchestration MUST use intent-named `*UseCase` classes, not generic application service
+classes. Each Use Case represents one cohesive action and exposes at most one public behavior
+operation, normally `execute(...)`; domain behavior and accurately named technical collaborators
+remain separate. Use Cases MUST use module-owned domain types and ports, not concrete adapters or
+HTTP, Vaadin, JPA, or other framework return types. Expected user-correctable validation and
+business-rule failures MUST return a Notification-based outcome; exceptions remain for unexpected
+technical, programming, or invariant failures. The implementation guide is
+[`docs/architecture/application-layer.md`](../../docs/architecture/application-layer.md).
 
 ### XVIII. Documentation Is Part of the Product
-Useful documentation MUST evolve in the same vertical slice as the implementation and MUST serve a
-concrete audience and purpose; documentation created merely to satisfy a requirement is prohibited.
-Stale documentation is a defect. The README MUST remain concise and act as the project entry point;
-detailed material MUST live in an appropriate documentation structure. The project MUST document,
-where applicable, its purpose, developer setup and local development, architecture and module
-boundaries, domain concepts, Authentik integration, configuration, PostgreSQL and Flyway,
-testing, container deployment, Docker Compose, external PostgreSQL, backup and restore, PWA and
-degraded connectivity, operational troubleshooting, and non-obvious architectural decisions.
-
-Long or complex technical documentation MUST include diagrams or images where they materially
-improve comprehension. Mermaid MUST be used for diagrams that it can reasonably express, with the
-source embedded in the relevant version-controlled Markdown; exported diagram images MUST NOT be
-the source of truth in those cases. Diagrams MUST add information rather than duplicate prose, and
-complex diagrams SHOULD be split into focused views. The Mermaid diagram type MUST suit the
-information being conveyed, including flowchart, sequence, state, class, entity-relationship, C4,
-Git graph, or timeline diagrams where appropriate. Architecture documentation MUST explain the
-major Spring Modulith modules, their responsibilities and allowed dependencies, important
-interactions and domain events, and runtime/deployment topology, using Mermaid where appropriate;
-it MUST describe intent and constraints rather than duplicate every class. Significant decisions
-whose rationale is not evident from the implementation SHOULD use lightweight ADRs that explain
-context, decision, consequences, and relevant alternatives.
+Documentation MUST evolve with relevant slices, serve a concrete purpose, and remain current. The
+README is the concise entry point; detailed guidance MUST cover applicable setup, architecture,
+domain, identity, configuration, persistence, testing, deployment, operations, and PWA behavior.
+Use Mermaid source in version-controlled Markdown where a diagram materially improves
+understanding. Significant architectural decisions require lightweight ADRs with context, decision,
+consequences, and alternatives. This keeps decisions and operation understandable.
 
 ### XIX. Background Jobs and Scheduling
-When persistent background processing, delayed work, retries, or recurring business work is
-required, JobRunr MUST be the preferred solution. Spring `@Scheduled`, custom executor schedulers,
-Quartz, and similar alternatives MUST NOT be introduced for persistent or business-relevant work
-without explicit documented justification. JobRunr SHOULD use PostgreSQL persistence where feasible
-to avoid additional infrastructure, and it MUST NOT be added before a concrete requirement exists.
-Job handlers MUST invoke application or domain behavior rather than contain substantial business
-logic, MUST be idempotent when retries can occur, and MUST have automated behavioral tests. The
-first introduction of JobRunr MUST be documented as an architectural decision.
+When persistent or business-relevant background work is required, JobRunr is preferred and SHOULD
+use PostgreSQL persistence where feasible; alternative schedulers require explicit documented
+justification. Do not add scheduling infrastructure before a concrete need. Job handlers MUST
+delegate business behavior, be idempotent when retries are possible, have behavioral tests, and
+its first introduction requires an ADR. This avoids accidental scheduling infrastructure.
 
 ### XX. Repository Governance
-The repository MUST contain an appropriate `.gitignore` and keep it current for the actual Plukk
-toolchain. It MUST ignore generated build output and dependencies, Vaadin-generated frontend and
-build artifacts, IDE-local state, machine-specific files, Playwright output, test reports, logs,
-temporary files, local container or database data, local environment overrides, credentials, and
-secrets. Example configuration MAY be version-controlled only without real secrets. Specifications,
-plans, tasks, documentation, Mermaid sources, ADRs, Maven Wrapper files, and project source files
-MUST remain version-controlled. The `.gitignore` MUST NOT accumulate unrelated tool patterns.
+Keep a stack-appropriate `.gitignore` that excludes generated, local, sensitive, and ephemeral
+artifacts while retaining source, documentation, Spec Kit artifacts, Mermaid sources, ADRs, and
+Maven Wrapper files. Commits MUST be cohesive, meaningful Conventional Commits and normally carry
+their behavior's tests and documentation. `trunk` is the only permanent integration branch and
+MUST remain buildable, testable, releasable, and linear; short-lived work integrates promptly
+without merge commits or force-pushing `trunk`. Releases originate and are tagged from `trunk`.
+The implementation guide is [`docs/development-workflow.md`](../../docs/development-workflow.md).
 
-Every commit MUST follow Conventional Commits in the form
-`<type>(optional-scope): <description>`. Allowed types include `feat`, `fix`, `test`, `docs`,
-`refactor`, `build`, `ci`, `chore`, and `perf`; breaking changes MUST use Conventional Commits
-breaking-change notation. Descriptions MUST be concise, imperative, and meaningful; vague messages
-such as `changes`, `update`, `fix stuff`, `wip`, or `more work` are prohibited. Commits MUST be
-cohesive and independently understandable, avoiding both unrelated giant changes and trivial
-commit-count inflation. Behavior changes MUST normally include their intrinsic tests and
-documentation.
-
-`trunk` is Plukk's sole permanent and authoritative integration branch. `main`, `master`,
-`develop`, `development`, and `integration` MUST NOT serve as alternative permanent integration
-branches. Documentation, automation, CI, release processes, and repository settings MUST treat
-`trunk` as primary, and it MUST remain buildable, testable, and releasable. Development follows
-trunk-based development: sufficiently small safe changes MAY be made directly on `trunk`; otherwise
-short-lived branches MUST originate from, synchronize with, and integrate quickly into `trunk`.
-Long-lived feature branches and alternative integration branches are prohibited. Incomplete code
-MAY reach `trunk` only when it is safe, not unintentionally exposed, and passes all quality gates.
-Feature toggles require a concrete need.
-
-The `trunk` history MUST remain linear. Merge commits MUST NOT enter `trunk`; branches MUST rebase
-onto current `trunk` when necessary and integrate by rebase-and-merge or, when intermediate commits
-do not warrant preservation, squash-and-merge. Published `trunk` history MUST NOT be rewritten and
-force-pushing `trunk` is prohibited. Force-pushing shared branches SHOULD be avoided and requires
-coordination before history is rewritten. Pull requests MAY support review and validation but MUST
-be small, short-lived, based on `trunk`, pass applicable gates, use a linear integration strategy,
-and have their source branch deleted after integration. Hosting platforms SHOULD protect `trunk` by
-prohibiting force pushes and merge commits, requiring linear history and applicable status checks,
-and allowing rebase merges and optionally squash merges.
-
-Releases MUST originate from `trunk`, and release tags MUST point to commits already on `trunk`.
-Permanent release branches are prohibited; exceptional temporary release branches MUST be
-short-lived. Version tags SHOULD use a consistent semantic-version format such as `v1.0.0`. Spec
-Kit artifacts follow this same policy: its generated feature branch is a short-lived branch from
-`trunk`, not a permanent branch model, and MUST ultimately be rebased and integrated according to
-the linear-history policy.
+### XXI. Definition of Done
+A feature is complete only when its acceptance criteria and all applicable constitutional principles
+are satisfied; required tests are green; relevant migrations and documentation are included; no
+known broken placeholders remain; the repository is clean; commits are cohesive Conventional
+Commits; and `trunk` remains buildable, testable, and releasable. This prevents partial delivery
+from being called complete.
 
 ## Product and Technical Constraints
 
-- Plukk MUST remain a self-hosted, single-household application rather than evolve implicitly into
-  a multi-tenant SaaS platform.
-- Likely business modules include `identity`, `household`, `catalog`, `shopping`,
-  `collaboration`, and `preferences`. These names are guidance and MAY be refined during design,
-  but the capability boundaries MUST remain business-oriented.
-- Production infrastructure MUST stay limited to the application container and PostgreSQL unless a
-  new requirement explicitly justifies expansion.
-- Major technology versions in active use MUST be recorded in the README so implementation and
-  review work share the same baseline.
-- JobRunr is permitted only for a concrete persistent background-processing or scheduling need and
-  MUST use PostgreSQL persistence where feasible.
-- The repository MUST maintain a stack-appropriate `.gitignore`; source, documentation, Spec Kit
-  artifacts, and Maven Wrapper files MUST be tracked, while local, generated, sensitive, and
-  ephemeral artifacts MUST be ignored.
+- Business modules include `identity`, `household`, `catalog`, `shopping.list`,
+  `shopping.input`, `shopping.item`, `shopping.history`, `collaboration`, and `preferences` when
+  implemented. Names may change only for a business-capability boundary with an explicit API.
+- Application code MUST remain framework-independent outside integration and presentation edges;
+  domain code MUST NOT depend on application, infrastructure, UI, web, JPA, Spring, or Vaadin.
+- CI MUST verify module boundaries and layer rules, run focused tests for changed modules, and run
+  applicable full integration and end-to-end suites before merge.
 
 ## Delivery Workflow and Quality Gates
 
-- Every specification, plan, task list, implementation, and code review MUST treat this
-  constitution as the highest-priority engineering policy.
-- New work MUST be expressed and reviewed as vertical slices that preserve a usable application
-  state.
-- Reviews MUST verify module boundaries, mobile-first usability, security rules, persistence
-  discipline, behavioral test expectations, and documentation quality from this constitution.
-- Documentation reviews MUST verify that Markdown contains Mermaid source for diagrams where
-  visuals materially improve technical understanding, and that significant decisions have ADRs.
-- Reviews and automation MUST verify Conventional Commit messages, repository hygiene, `trunk` as
-  the sole permanent integration branch, trunk-based development, linear integration, and release
-  tags originating from `trunk` where applicable.
-- Deviations from the constitution require an explicit documented amendment or an approved
-  specification that narrows an allowed exception without contradicting the constitution.
+- Specifications, plans, tasks, implementation, review, and CI MUST comply with this constitution
+  and the applicable supporting architecture guides.
+- Each feature specification and task breakdown MUST identify its owning module, allowed
+  dependencies and public interfaces, Use Cases, migration location, and required module,
+  persistence, event, and end-to-end tests.
+- Deviations require an explicit constitution amendment or an approved specification that narrows
+  an allowed exception without contradicting this constitution.
 
 ## Governance
 
-This constitution supersedes lower-priority engineering practices for Plukk. Amendments MUST be
-documented in `.specify/memory/constitution.md`, include a clear rationale, and record the semantic
-version impact. A MAJOR version bump is required for incompatible removals or redefinitions of
-governance. A MINOR version bump is required for new principles or materially expanded guidance. A
-PATCH version bump is required for clarifications and non-semantic wording changes. Compliance MUST
-be checked during specification, planning, task generation, implementation, code review, and
-repository administration. Changes that conflict with this constitution MUST be rejected or
-accompanied by a constitution amendment applied first.
+This constitution supersedes lower-priority engineering practices. Amendments MUST be documented
+here with a rationale and semantic version impact. Use a MAJOR version for incompatible removals or
+redefinitions, a MINOR version for new or materially expanded requirements, and a PATCH version
+for clarifications or non-semantic documentation refactors. Compliance is reviewed during
+specification, planning, task generation, implementation, code review, CI, and repository
+administration; conflicting changes MUST be rejected or amended first.
 
-**Version**: 1.2.0 | **Ratified**: 2026-08-29 | **Last Amended**: 2026-08-30
+**Version**: 1.4.1 | **Ratified**: 2026-08-29 | **Last Amended**: 2026-08-31
