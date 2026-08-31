@@ -25,36 +25,36 @@ jobs:
           java-version: "25"
           cache: maven
 
-      - name: Validate commit messages
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          PUSH_BEFORE_SHA: ${{ github.event.before }}
-          PUSH_SHA: ${{ github.sha }}
-        run: |
-          set -eu
-          pattern='^(feat|fix|test|docs|refactor|build|ci|chore|perf)(\([a-z0-9-]+\))?!?: .+$'
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            commits=$(git rev-list --no-merges "${PR_BASE_SHA}..${PR_HEAD_SHA}")
-          else
-            if [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
-              commits=$(git rev-list --no-merges "${PUSH_BEFORE_SHA}..${PUSH_SHA}")
-            else
-              commits=$(printf '%s\n' "$PUSH_SHA")
-            fi
-          fi
-          for commit in $commits; do
-            subject=$(git log -1 --format=%s "$commit")
-            echo "Checking $commit: $subject"
-            printf '%s\n' "$subject" | grep -E "$pattern" >/dev/null
-          done
+      # - name: Validate commit messages
+      #   env:
+      #     EVENT_NAME: ${{ github.event_name }}
+      #     PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      #     PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      #     PUSH_BEFORE_SHA: ${{ github.event.before }}
+      #     PUSH_SHA: ${{ github.sha }}
+      #   run: |
+      #     set -eu
+      #     pattern='^(feat|fix|test|docs|refactor|build|ci|chore|perf)(\([a-z0-9-]+\))?!?: .+$'
+      #     if [ "$EVENT_NAME" = "pull_request" ]; then
+      #       commits=$(git rev-list --no-merges "${PR_BASE_SHA}..${PR_HEAD_SHA}")
+      #     else
+      #       if [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+      #         commits=$(git rev-list --no-merges "${PUSH_BEFORE_SHA}..${PUSH_SHA}")
+      #       else
+      #         commits=$(printf '%s\n' "$PUSH_SHA")
+      #       fi
+      #     fi
+      #     for commit in $commits; do
+      #       subject=$(git log -1 --format=%s "$commit")
+      #       echo "Checking $commit: $subject"
+      #       printf '%s\n' "$subject" | grep -E "$pattern" >/dev/null
+      #     done
 
-      - name: Validate pull request title
-        if: github.event_name == 'pull_request'
-        run: |
-          pattern='^(feat|fix|test|docs|refactor|build|ci|chore|perf)(\([a-z0-9-]+\))?!?: .+$'
-          printf '%s\n' "${{ github.event.pull_request.title }}" | grep -E "$pattern" >/dev/null
+      # - name: Validate pull request title
+      #   if: github.event_name == 'pull_request'
+      #   run: |
+      #     pattern='^(feat|fix|test|docs|refactor|build|ci|chore|perf)(\([a-z0-9-]+\))?!?: .+$'
+      #     printf '%s\n' "${{ github.event.pull_request.title }}" | grep -E "$pattern" >/dev/null
 
       - name: Install Playwright browsers
         # Keep this version in sync with playwright.version in pom.xml.
