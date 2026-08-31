@@ -97,17 +97,17 @@ item for ambiguous input.
 
 ### Tests for User Story 1
 
-- [ ] T023 [P] [US1] Extend parser behavior tests for supported quantities, package forms, variants, and reformulation feedback in src/test/java/dev/casteels/plukk/shopping/input/ShoppingInputParserTest.java
-- [ ] T024 [P] [US1] Add PostgreSQL Testcontainers tests for catalog lookup, custom product creation, active-item uniqueness, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/input/AddShoppingNeedIntegrationTest.java
+- [X] T023 [P] [US1] Extend parser behavior tests for supported quantities, package forms, variants, and reformulation feedback in src/test/java/dev/casteels/plukk/shopping/input/ShoppingInputParserTest.java
+- [X] T024 [P] [US1] Add PostgreSQL Testcontainers tests for catalog lookup, custom product creation, active-item uniqueness, and Notification outcomes in src/test/java/dev/casteels/plukk/shopping/input/AddShoppingNeedIntegrationTest.java
 - [ ] T025 [P] [US1] Add Playwright mobile coverage for supported add, custom-product creation, duplicate focus, and invalid-input feedback in src/test/java/dev/casteels/plukk/e2e/AddShoppingNeedE2ETest.java
 
 ### Implementation for User Story 1
 
-- [ ] T026 [US1] Expose catalog category lookup and household product lookup/create APIs without exposing catalog persistence internals in src/main/java/dev/casteels/plukk/catalog/api/CatalogProductAccess.java and src/main/java/dev/casteels/plukk/catalog/api/ShoppingCategoryAccess.java
-- [ ] T027 [US1] Refactor concise-input parsing and add/custom-product Use Cases to use household and catalog APIs and return Notification-based outcomes in src/main/java/dev/casteels/plukk/shopping/input/ShoppingInputParser.java, src/main/java/dev/casteels/plukk/shopping/input/AddShoppingNeedUseCase.java, src/main/java/dev/casteels/plukk/shopping/input/CreateCustomProductAndAddShoppingNeedUseCase.java, and src/main/java/dev/casteels/plukk/shopping/input/ShoppingNeedOutcome.java
-- [ ] T028 [US1] Keep concrete-item insertion and exact-active-item detection inside the shopping persistence adapter in src/main/java/dev/casteels/plukk/shopping/input/ShoppingNeedRepository.java
+- [X] T026 [US1] Expose catalog category lookup and household product lookup/create APIs without exposing catalog persistence internals in src/main/java/dev/casteels/plukk/catalog/api/CatalogProductAccess.java and src/main/java/dev/casteels/plukk/catalog/api/ShoppingCategoryAccess.java
+- [X] T027 [US1] Refactor concise-input parsing and add/custom-product Use Cases to use household and catalog APIs and return Notification-based outcomes in src/main/java/dev/casteels/plukk/shopping/input/ShoppingInputParser.java, src/main/java/dev/casteels/plukk/shopping/input/AddShoppingNeedUseCase.java, src/main/java/dev/casteels/plukk/shopping/input/CreateCustomProductAndAddShoppingNeedUseCase.java, and src/main/java/dev/casteels/plukk/shopping/input/ShoppingNeedOutcome.java
+- [X] T028 [US1] Keep concrete-item insertion and exact-active-item detection inside the shopping persistence adapter in src/main/java/dev/casteels/plukk/shopping/input/ShoppingNeedRepository.java
 - [ ] T029 [US1] Update the add component and list-detail integration to render confirmation, duplicate, custom-product, and reformulation states from Use Case outcomes in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java and src/main/java/dev/casteels/plukk/shopping/ui/ShoppingListDetailView.java
-- [ ] T030 [US1] Align the supported-input documentation and behavior contract with Notification outcomes in docs/domain/shopping-input.md and specs/001-initial-shopping-list/contracts/shopping-input.md
+- [X] T030 [US1] Align the supported-input documentation and behavior contract with Notification outcomes in docs/domain/shopping-input.md and specs/001-initial-shopping-list/contracts/shopping-input.md
 
 **Checkpoint**: The MVP free-text add flow works independently after list management and never
 creates an item from an uncertain interpretation.
