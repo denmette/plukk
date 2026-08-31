@@ -32,12 +32,17 @@ no merge commits. Release tags point to commits already on `trunk`; use consiste
 such as `v1.0.0`. Permanent release branches and alternate integration branches are not allowed.
 
 ```mermaid
+---
+config:
+  gitGraph:
+    mainBranchName: trunk
+---
 gitGraph
-    commit id: "trunk"
-    branch docs/governance
-    checkout docs/governance
-    commit id: "docs: guide changes"
-    checkout trunk
-    commit id: "rebase or squash integration"
-    commit id: "release tag"
+   commit id: "initial"
+   branch docs/governance
+   checkout docs/governance
+   commit id: "docs: guide changes"
+   checkout trunk
+   commit id: "rebase or squash integration"
+   commit id: "release" tag: "v1.0.0"
 ```
