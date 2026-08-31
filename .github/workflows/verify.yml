@@ -56,5 +56,9 @@ jobs:
           pattern='^(feat|fix|test|docs|refactor|build|ci|chore|perf)(\([a-z0-9-]+\))?!?: .+$'
           printf '%s\n' "${{ github.event.pull_request.title }}" | grep -E "$pattern" >/dev/null
 
+      - name: Install Playwright browsers
+        # Keep this version in sync with playwright.version in pom.xml.
+        run: npx --yes playwright@1.60.0 install --with-deps chromium
+
       - name: Run Maven verify
         run: ./mvnw verify
