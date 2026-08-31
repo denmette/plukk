@@ -15,6 +15,18 @@ erDiagram
     CATALOG_PRODUCT ||--o{ SHOPPING_HISTORY_ENTRY : records
 ```
 
+## Persistence Ownership
+
+| Module | Owned tables | Flyway location | Required integration evidence |
+|---|---|---|---|
+| `household` | `household`, `household_member` | `db/migration/household` | PostgreSQL authorization and role-resolution behavior |
+| `catalog` | `category`, `catalog_product` | `db/migration/catalog` | PostgreSQL seeded-category and household-product behavior |
+| `shopping` | `shopping_list`, `shopping_item`, `shopping_history_entry` | `db/migration/shopping` | PostgreSQL list, item, duplicate, and household-history behavior |
+
+`identity` and `collaboration` own no persistent business tables in this release. The existing
+fresh-install baseline must be replaced before release with these module-owned locations and no
+cross-module foreign keys; cross-capability access uses named APIs or confirmed domain events.
+
 ## Entities
 
 ### Household
@@ -27,8 +39,9 @@ erDiagram
 
 - **Purpose**: Maps an authenticated external identity to household access.
 - **Fields**: identifier; stable external subject; display name; role; active status; timestamps.
-- **Rules**: External subject is unique in the household. First release authorizes active `MEMBER`
-  users; `OWNER` and `GUEST` are retained values but guest workflows are not delivered.
+- **Rules**: External subject is unique in the household. First release authorizes active `OWNER`
+  and `MEMBER` users. `GUEST` is a retained role but cannot access shopping lists; guest workflows
+  are not delivered.
 
 ### Category
 
@@ -65,8 +78,8 @@ erDiagram
 - **Purpose**: Preserves a purchased concrete need for fast re-addition.
 - **Fields**: identifier; household; catalog product; copied variant, quantity, unit, package size,
   package descriptor; purchased timestamp.
-- **Rules**: Purchasing creates or refreshes an entry. Re-adding copies the concrete details unless
-  an exact active item already exists.
+- **Rules**: Purchasing creates or refreshes an entry visible to all authorized household users.
+  Re-adding copies the concrete details unless an exact active item already exists.
 
 ## State Transitions
 
@@ -87,5 +100,6 @@ stateDiagram-v2
 - A catalog product always has one fixed starter category.
 - Quantity and package-size values are positive when supplied.
 - A parser result is accepted only when exactly one supported interpretation exists.
-- Users without active household-member access cannot read or change household data.
+- Only active `OWNER` and `MEMBER` users can read or change household shopping data; `GUEST` users
+  cannot access shopping lists in this release.
 - Only post-persistence confirmed item state is published to collaborating users.

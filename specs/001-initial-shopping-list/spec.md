@@ -16,6 +16,11 @@
 - Q: When a member adds a shopping need that exactly matches an active item already on the list, what should happen? → A: Keep the existing item unchanged and bring it into view.
 - Q: How should product categories work in the first release? → A: Fixed starter categories; members select one for custom products.
 
+### Session 2026-08-31
+
+- Q: In the first useful release, which signed-in household roles must be able to use shopping lists? → A: Owners and members can use shopping lists; guests exist in the domain but cannot use lists in this release.
+- Q: Should recently purchased needs be shared across the household or kept personal to each member? → A: Recently purchased needs are shared household-wide.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Add a Shopping Need Quickly (Priority: P1)
@@ -108,8 +113,9 @@ and add the same concrete item again from recently used needs.
 
 1. **Given** the catalog contains common products, **When** a member searches by product name,
    **Then** matching products are discoverable with their category and visual recognition aid.
-2. **Given** a member previously purchased `Kipfilet - 400 g`, **When** they choose it from recent
-   needs, **Then** a new active item preserves the variant, quantity, and unit.
+2. **Given** a household member previously purchased `Kipfilet - 400 g`, **When** another
+   household member chooses it from recent needs, **Then** a new active item preserves the variant,
+   quantity, and unit.
 3. **Given** a member creates a custom product, **When** another household member searches the
    catalog, **Then** that product is available within the same installation.
 4. **Given** a member creates a custom product, **When** they choose its category, **Then** they
@@ -163,8 +169,9 @@ are not shown as saved.
 
 - **FR-001**: The system MUST allow authenticated household members to create, open, rename, and
   delete multiple shopping lists for their household.
-- **FR-002**: The system MUST limit first-release shopping-list access to normal household members
-  while retaining owner, member, and guest roles as future domain concepts.
+- **FR-002**: The system MUST allow household owners and members to use shopping lists in the
+  first release. The domain MUST retain owner, member, and guest roles; guests MUST NOT access
+  shopping lists in this release.
 - **FR-003**: The system MUST provide a reusable, searchable catalog of common household and
   grocery products, each with a name, category from the fixed starter category list, and visual
   recognition aid.
@@ -190,7 +197,8 @@ are not shown as saved.
   shopping need on the same list; when a member adds an exact active match, the system MUST keep
   the existing item unchanged and bring it into view.
 - **FR-013**: The system MUST retain purchased concrete shopping needs with their useful variant,
-  quantity, and unit information and make them available for quick re-addition.
+  quantity, and unit information as household-wide history and make them available for quick
+  re-addition by household owners and members.
 - **FR-014**: The system MUST make meaningful changes to a shared list visible promptly to other
   active household members, including add, purchase, restore, removal, and item-information
   changes.
@@ -220,8 +228,8 @@ are not shown as saved.
 - **Shopping Item**: A concrete need on one shopping list, such as `Kipfilet - 400 g`, linked to a
   catalog product and holding applicable variant, quantity, unit, package, and purchase state.
 - **Category**: A fixed starter shopping grouping used to organize catalog products and list items.
-- **Shopping History Entry**: A record of a purchased concrete shopping need used to enable recent
-  re-addition and future non-predictive reuse features.
+- **Shopping History Entry**: A household-owned record of a purchased concrete shopping need used
+  to enable recent re-addition and future non-predictive reuse features.
 
 ## Success Criteria *(mandatory)*
 
@@ -242,14 +250,14 @@ are not shown as saved.
 
 ## Assumptions
 
-- Each deployment starts with one household and its first normal member can use its configured
+- Each deployment starts with one household and its first owner or member can use its configured
   external identity; household onboarding and guest invitation flows are out of scope.
 - The first-release starter catalog contains common household and grocery products suitable for the
   intended household, while members can add custom products for gaps.
 - The initial category taxonomy uses the examples supplied in the product description. Members can
   select from that fixed starter list for custom products; category administration is deferred.
-- Recently used needs are shown from previously purchased items; favorites, prediction, and
-  automatic recurring suggestions are deferred.
+- Recently used needs are shown household-wide from previously purchased items; favorites,
+  prediction, and automatic recurring suggestions are deferred.
 - Concurrent changes to the same shopping item use the latest confirmed change; sophisticated
   distributed conflict resolution is not required.
 - Temporary degraded connectivity covers clear status, graceful recovery, and useful already shown

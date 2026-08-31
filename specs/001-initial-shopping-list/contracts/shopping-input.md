@@ -7,7 +7,7 @@ a public HTTP API contract.
 
 ## Input
 
-The member supplies one non-blank text value. Supported examples include:
+An authorized household owner or member supplies one non-blank text value. Supported examples include:
 
 | Input | Expected interpretation |
 |---|---|

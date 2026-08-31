@@ -2,7 +2,7 @@
 
 ## Audience and Scope
 
-This contract describes observable behavior for household members using Plukk on a phone. It
+This contract describes observable behavior for authorized household owners and members using Plukk on a phone. It
 excludes visual implementation details while defining states for acceptance and end-to-end tests.
 
 ## List Behavior
@@ -28,5 +28,5 @@ excludes visual implementation details while defining states for acceptance and 
 ## Authorization Behavior
 
 - An unauthenticated visitor is directed to sign in through the configured external provider.
-- An identity without active household-member access cannot access household data.
-- First release exposes member behavior only; guest invitations and per-list guest access are absent.
+- An identity without active `OWNER` or `MEMBER` household access cannot access household shopping data.
+- Guests cannot access shopping lists in this release; guest invitations and per-list guest access are absent.
