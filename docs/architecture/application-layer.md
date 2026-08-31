@@ -46,7 +46,8 @@ class with multiple public application actions into cohesive Use Cases instead.
 
 Use Cases depend on domain types and ports, never concrete infrastructure implementations or HTTP,
 Vaadin, JPA, or transport return types. Vaadin views call public Use Cases and translate outcomes
-into presentation feedback; domain and application code do not depend on Vaadin components.
+into presentation feedback; domain and application code do not depend on Vaadin components or
+Authentik-specific types.
 
 Test the public Use Case operation, including Notification outcomes for expected failures and
 exceptional technical or invariant failures where relevant.

@@ -18,6 +18,14 @@ End-to-end tests complement focused module tests and cannot be the only proof th
 CI runs module and architecture checks, focused tests for changed modules, and applicable full
 integration and end-to-end suites before merge.
 
+## Development and Test Identity
+
+Production uses Authentik through OpenID Connect. Local development and automated tests may use an
+explicit development or test identity mechanism so Authentik is not required for every run. Keep
+normal Spring Security authorization and household or member checks active, isolate the mechanism
+to development or test configuration, and ensure it cannot activate in production. Do not make
+domain or Use Case code depend on Authentik-specific types or disable security globally.
+
 ## Java Test Style
 
 Use JUnit and AssertJ. Tests have Given/When/Then structure and names in the form

@@ -1,7 +1,8 @@
 # Module Boundaries
 
 Plukk vertical slices are Spring Modulith application modules, not package conventions. A module
-owns a business capability, its application behavior, persistence changes, and tests.
+owns a business capability, its application behavior, persistence changes where applicable, and
+tests.
 
 ## Declaring and Using Modules
 
@@ -18,9 +19,10 @@ implementation.
 package dev.casteels.plukk.shopping.list;
 ```
 
-Business capability, rather than package aesthetics, determines a module boundary. As shopping
-behavior evolves independently, use `shopping.list`, `shopping.input`, `shopping.item`, and
-`shopping.history` as distinct modules.
+Business capability and independent evolution, rather than package aesthetics, determine a module
+boundary. Shopping may evolve into distinct `shopping.list`, `shopping.input`, `shopping.item`, and
+`shopping.history` modules when those capabilities warrant separate ownership; these are candidates,
+not permanently mandated names.
 
 ## Verification and Focused Tests
 

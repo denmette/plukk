@@ -1,6 +1,6 @@
 <!--
 Sync Impact Report
-Version change: 1.4.0 -> 1.4.1
+Version change: 1.4.1 -> 1.4.2
 Modified principles:
 - All principles: concise governing statements; normative intent unchanged
 Modified sections:
@@ -13,8 +13,11 @@ Removed sections:
 Follow-up TODOs:
 - None
 
-No architectural requirements were removed. Duplicate guidance was consolidated, and
-implementation-specific guidance moved to supporting documentation. Normative intent is unchanged.
+No architectural requirements were removed. Module boundaries are capability-driven rather than
+predetermined. "Stateless" now distinguishes persistent business state from permitted Vaadin and
+Spring Security session state. Authentik remains mandatory in production while deterministic
+development and test identity is allowed. Persistence ownership and testing apply only to modules
+that own persistent state. Normative intent is unchanged.
 -->
 # Plukk Constitution
 
@@ -35,16 +38,18 @@ Plukk MUST be a Spring Modulith modular monolith, not microservices. Every indep
 vertical slice MUST be a real business-capability module with an explicit public API and declared
 allowed dependencies. A module MUST expose only deliberate APIs or domain events; it MUST NOT
 access another module's internal domain objects, repositories, adapters, Use Cases, UI, or
-persistence implementation. Each module owns its application behavior, persistence changes, and
-tests, and MUST be independently testable without unrelated business modules. Automated
+persistence implementation. Each module owns its application behavior, persistence changes where
+applicable, and tests, and MUST be independently testable without unrelated business modules. Automated
 architecture tests MUST verify module boundaries. The implementation guide is
 [`docs/architecture/module-boundaries.md`](../../docs/architecture/module-boundaries.md).
 
 ### IV. Simple Deployment
-Production MUST run as one stateless application container and PostgreSQL. Configuration MUST use
-environment variables or mounted configuration or secrets. Redis, Kafka, RabbitMQ, Elasticsearch,
-Kubernetes, and comparable infrastructure require a concrete documented requirement. This keeps
-homelab operation practical.
+Production MUST run as one application container plus PostgreSQL. Persistent business state MUST
+NOT depend on the application container's local filesystem or lifecycle; runtime and session state
+required by Vaadin Flow and Spring Security is allowed. Configuration MUST use environment variables
+or mounted configuration or secrets. Redis, Kafka, RabbitMQ, Elasticsearch, Kubernetes, and
+comparable infrastructure require a concrete documented requirement. This keeps homelab operation
+practical.
 
 ### V. Modern Stable Technologies
 Use stable production releases only. The preferred Java version MUST be the latest stable LTS;
@@ -76,17 +81,23 @@ Complex invitation workflows are out of MVP scope unless specified. This matches
 the single-household product boundary.
 
 ### X. Authentication and Authorization
-Authentication MUST use Authentik through OpenID Connect; Plukk MUST NOT manage passwords. Spring
-Security owns authentication and server-side authorization. CSRF MUST NOT be disabled for
-convenience, and secrets, credentials, tokens, and session identifiers MUST never be logged or
-committed. This makes security a product boundary.
+Production authentication MUST use Authentik through OpenID Connect; Plukk MUST NOT manage
+passwords. Spring Security owns authentication and server-side authorization. Local development and
+automated tests MAY use an isolated development or test identity mechanism when normal authorization
+boundaries and household or member authorization remain active, security is not globally disabled,
+and the mechanism cannot be enabled in production. Domain and Use Case code MUST remain independent
+of Authentik-specific types. CSRF MUST NOT be disabled for convenience, and secrets, credentials,
+tokens, and session identifiers MUST never be logged or committed. This makes security a product
+boundary.
 
 ### XI. Persistence
 PostgreSQL is the authoritative persistent store. Schema changes MUST use Flyway; Hibernate schema
-generation is prohibited in production. A module owns its tables, persistence adapter, and Flyway
-migrations. Cross-module foreign keys and shared-table ownership need an explicit architecture
-exception. One database and Flyway configuration are the default; independent schema or deployment
-requires an ADR. The implementation guide is
+generation is prohibited in production. Every migration has exactly one module owner. A module that
+owns persistent state MUST own its tables, persistence adapter, Flyway migrations, and meaningful
+PostgreSQL integration tests; modules without persistent state MUST NOT add persistence merely to
+satisfy convention. Cross-module foreign keys and shared-table ownership need an explicit
+architecture exception. One database and Flyway configuration are the default; independent schema
+or deployment requires an ADR. The implementation guide is
 [`docs/architecture/persistence.md`](../../docs/architecture/persistence.md).
 
 ### XII. Behavioral Testing
@@ -95,16 +106,19 @@ MUST use Given/When/Then and the name
 `given<Precondition>_when<Action>_then<ExpectedBehavior>`, with JUnit and AssertJ. Use
 Testcontainers for PostgreSQL-dependent integration tests and Playwright against the running
 application for applicable critical end-to-end journeys, including representative mobile viewports.
-Focused module integration tests MUST prove each slice's exposed behavior, PostgreSQL persistence,
-and applicable domain-event interactions; end-to-end tests complement, never replace, module tests.
+Focused module integration tests MUST prove each slice's exposed behavior, module-owned PostgreSQL
+persistence where applicable, and applicable domain-event interactions; end-to-end tests complement,
+never replace, module tests.
 The implementation guide is [`docs/architecture/testing.md`](../../docs/architecture/testing.md).
 
 ### XIII. Vertical Slices
 Deliver features as usable vertical slices, not horizontal stages of tables, services, and UI. A
-slice that independently evolves MUST own a coherent capability, state, Use Cases, persistence, and
-tests as a module. Shopping MUST divide into `shopping.list`, `shopping.input`, `shopping.item`,
-and `shopping.history` as their Use Cases evolve independently. This keeps delivery user-visible
-and integration risk contained.
+slice that independently evolves MUST own a coherent capability, state, Use Cases, persistence where
+applicable, and tests as a Spring Modulith module. Shopping capabilities MAY evolve into distinct
+modules such as `shopping.list`, `shopping.input`, `shopping.item`, and `shopping.history` when
+they represent independently evolving business capabilities. Module boundaries MUST follow business
+capability and independent evolution rather than package aesthetics. This keeps delivery
+user-visible and integration risk contained.
 
 ### XIV. Domain Simplicity
 A catalog entry is reusable; a shopping item is its list placement. A list MUST not accidentally
@@ -167,9 +181,8 @@ from being called complete.
 
 ## Product and Technical Constraints
 
-- Business modules include `identity`, `household`, `catalog`, `shopping.list`,
-  `shopping.input`, `shopping.item`, `shopping.history`, `collaboration`, and `preferences` when
-  implemented. Names may change only for a business-capability boundary with an explicit API.
+- Module names and boundaries MUST evolve from business capability and independent evolution, with
+  an explicit public API and declared dependencies; they are not a predetermined package structure.
 - Application code MUST remain framework-independent outside integration and presentation edges;
   domain code MUST NOT depend on application, infrastructure, UI, web, JPA, Spring, or Vaadin.
 - CI MUST verify module boundaries and layer rules, run focused tests for changed modules, and run
@@ -194,4 +207,4 @@ for clarifications or non-semantic documentation refactors. Compliance is review
 specification, planning, task generation, implementation, code review, CI, and repository
 administration; conflicting changes MUST be rejected or amended first.
 
-**Version**: 1.4.1 | **Ratified**: 2026-08-29 | **Last Amended**: 2026-08-31
+**Version**: 1.4.2 | **Ratified**: 2026-08-29 | **Last Amended**: 2026-08-31
