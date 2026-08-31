@@ -1,7 +1,6 @@
 package dev.casteels.plukk.catalog.api;
 
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * Catalog-owned API for accessing products without exposing persistence internals.

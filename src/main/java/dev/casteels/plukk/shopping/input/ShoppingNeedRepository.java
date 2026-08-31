@@ -7,6 +7,13 @@ import java.util.Optional;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Shopping-owned persistence adapter for shopping items and item-related queries.
+ *
+ * <p>Responsible for: finding exact active items for duplicate detection, creating new items,
+ * and querying category/product metadata. Product creation is delegated to {@link
+ * dev.casteels.plukk.catalog.api.CatalogProductAccess}.
+ */
 @Repository
 class ShoppingNeedRepository {
 
@@ -16,25 +23,29 @@ class ShoppingNeedRepository {
         this.jdbc = jdbc;
     }
 
-    Optional<Long> findProductId(long householdId, String name) {
-        return jdbc.sql("SELECT id FROM catalog_product WHERE household_id = :householdId AND normalized_name = :name AND active = TRUE")
-                .param("householdId", householdId).param("name", normalized(name)).query(Long.class).optional();
-    }
-
+    /**
+     * Checks whether a category exists in the household.
+     *
+     * @param householdId the household identifier
+     * @param categoryId the category identifier to check
+     * @return true if the category exists and belongs to the household
+     */
     boolean categoryExists(long householdId, long categoryId) {
         return jdbc.sql("SELECT EXISTS (SELECT 1 FROM category WHERE id = :categoryId AND household_id = :householdId)")
                 .param("categoryId", categoryId).param("householdId", householdId).query(Boolean.class).single();
     }
 
-    long createCustomProduct(long householdId, long categoryId, String name) {
-        return jdbc.sql("""
-                        INSERT INTO catalog_product (household_id, category_id, name, normalized_name, origin)
-                        VALUES (:householdId, :categoryId, :name, :normalizedName, 'CUSTOM') RETURNING id
-                        """)
-                .param("householdId", householdId).param("categoryId", categoryId)
-                .param("name", name).param("normalizedName", normalized(name)).query(Long.class).single();
-    }
-
+    /**
+     * Finds an exact active item on the list matching all interpreted need details.
+     *
+     * <p>Duplicate detection requires: product ID, variant, quantity, unit, package size,
+     * package unit, and package descriptor to match exactly, with state = ACTIVE.
+     *
+     * @param listId the shopping list identifier
+     * @param productId the catalog product identifier
+     * @param need the interpreted shopping need
+     * @return the item ID if an exact match exists, empty otherwise
+     */
     Optional<Long> findExactActiveItem(long listId, long productId, ShoppingInputParser.InterpretedNeed need) {
         return jdbc.sql("""
                         SELECT id FROM shopping_item WHERE shopping_list_id = :listId AND catalog_product_id = :productId
@@ -47,6 +58,14 @@ class ShoppingNeedRepository {
                 .param("packageUnit", need.packageUnit()).param("packageDescriptor", need.packageDescriptor()).query(Long.class).optional();
     }
 
+    /**
+     * Creates a new shopping item with the interpreted need details.
+     *
+     * @param listId the shopping list identifier
+     * @param productId the catalog product identifier
+     * @param need the interpreted shopping need
+     * @return the created shopping item
+     */
     ShoppingItem createItem(long listId, long productId, ShoppingInputParser.InterpretedNeed need) {
         return jdbc.sql("""
                         INSERT INTO shopping_item (shopping_list_id, catalog_product_id, variant, normalized_variant, quantity, unit, package_size, package_unit, package_descriptor, state)

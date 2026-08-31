@@ -1,22 +1,25 @@
 package dev.casteels.plukk.shopping.input;
 
+import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class FindCatalogProductNameUseCase {
-    private final ShoppingNeedMembership membership;
+    private final AuthorizedHouseholdUser authUser;
     private final ShoppingNeedRepository repository;
 
-    FindCatalogProductNameUseCase(ShoppingNeedMembership membership, ShoppingNeedRepository repository) {
-        this.membership = membership;
+    FindCatalogProductNameUseCase(AuthorizedHouseholdUser authUser, ShoppingNeedRepository repository) {
+        this.authUser = authUser;
         this.repository = repository;
     }
 
     @Transactional(readOnly = true)
     public String execute(long productId) {
-        return repository.findProductName(membership.currentHouseholdId(), productId)
+        var user = authUser.currentUser()
+                .orElseThrow(() -> new AccessDeniedException("Active membership required."));
+        return repository.findProductName(user.householdId(), productId)
                 .orElseThrow(() -> new AccessDeniedException("Product is not available to this household."));
     }
 }
