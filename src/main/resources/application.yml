@@ -20,6 +20,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  modulith:
+    runtime:
+      flyway-enabled: true
   security:
     oauth2:
       client:

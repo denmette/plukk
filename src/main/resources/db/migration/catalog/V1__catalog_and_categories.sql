@@ -1,3 +1,26 @@
+CREATE TABLE category (
+    id BIGSERIAL PRIMARY KEY,
+    household_id BIGINT NOT NULL,
+    stable_key VARCHAR(80) NOT NULL,
+    display_name VARCHAR(120) NOT NULL,
+    display_order INTEGER NOT NULL,
+    CONSTRAINT category_key_unique UNIQUE (household_id, stable_key)
+);
+
+CREATE TABLE catalog_product (
+    id BIGSERIAL PRIMARY KEY,
+    household_id BIGINT NOT NULL,
+    category_id BIGINT NOT NULL REFERENCES category (id),
+    name VARCHAR(160) NOT NULL,
+    normalized_name VARCHAR(160) NOT NULL,
+    visual_reference VARCHAR(255),
+    origin VARCHAR(20) NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT catalog_product_household_name_unique UNIQUE (household_id, normalized_name)
+);
+
 INSERT INTO category (household_id, stable_key, display_name, display_order)
 VALUES
     (1, 'produce', 'Produce', 10),
