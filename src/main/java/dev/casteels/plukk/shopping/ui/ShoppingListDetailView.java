@@ -10,6 +10,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+
 import dev.casteels.plukk.shopping.input.AddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.CreateCustomProductAndAddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.FindCatalogProductNameUseCase;
@@ -67,8 +68,9 @@ public class ShoppingListDetailView extends VerticalLayout implements BeforeEnte
 
     private void handleAddResult(ShoppingNeedOutcome result) {
         if (result instanceof ShoppingNeedOutcome.Confirmed confirmed) {
-            showItem(confirmed.item());
-            Notification.show("Added " + itemLabel(confirmed.item()), 3000, Notification.Position.BOTTOM_START);
+            String label = itemLabel(confirmed.item());
+            showItem(confirmed.item(), label);
+            Notification.show("Added " + label, 3000, Notification.Position.BOTTOM_START);
         } else if (result instanceof ShoppingNeedOutcome.Duplicate duplicate) {
             getUI().ifPresent(ui -> ui.getPage().executeJs("document.getElementById($0)?.focus()", "shopping-item-" + duplicate.itemId()));
             show(result.notification());
@@ -77,8 +79,8 @@ public class ShoppingListDetailView extends VerticalLayout implements BeforeEnte
         }
     }
 
-    private void showItem(ShoppingItem item) {
-        Div row = new Div(new Span(itemLabel(item)));
+    private void showItem(ShoppingItem item, String label) {
+        Div row = new Div(new Span(label));
         row.setId("shopping-item-" + item.id());
         row.getElement().setAttribute("tabindex", "-1");
         row.getStyle().set("min-height", "44px");
@@ -87,7 +89,19 @@ public class ShoppingListDetailView extends VerticalLayout implements BeforeEnte
     }
 
     private String itemLabel(ShoppingItem item) {
-        String details = item.variant() == null ? findProductName.execute(item.catalogProductId()) : item.variant();
+        String productName;
+        if (item.variant() != null) {
+            productName = item.variant();
+        } else {
+            try {
+                productName = findProductName.execute(item.catalogProductId());
+            } catch (RuntimeException e) {
+                // Fallback if product name lookup fails (e.g., custom product not yet visible in read model)
+                productName = "Product #" + item.catalogProductId();
+            }
+        }
+        
+        String details = productName;
         if (item.quantity() != null) details = details + " - " + item.quantity().stripTrailingZeros().toPlainString();
         if (item.unit() != null) details += " " + item.unit();
         if (item.packageSize() != null) details += " x " + item.packageSize().stripTrailingZeros().toPlainString() + " " + item.packageUnit();

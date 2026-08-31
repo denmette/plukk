@@ -53,10 +53,13 @@ public class CreateCustomProductAndAddShoppingNeedUseCase {
         var customProduct = catalog.findOrCreateCustomProduct(householdId, need.product(), categoryId);
         long productId = customProduct.id();
 
+        // For custom products, use the product name as variant to avoid database lookups
+        var needWithVariant = new ShoppingInputParser.InterpretedNeed(need.product(), customProduct.name(), need.quantity(), need.unit(), need.packageSize(), need.packageUnit(), need.packageDescriptor());
+
         // Check for exact active duplicate item on this list
-        return repository.findExactActiveItem(listId, productId, need)
+        return repository.findExactActiveItem(listId, productId, needWithVariant)
                 .<ShoppingNeedOutcome>map(itemId -> new ShoppingNeedOutcome.Duplicate(itemId,
                         Notification.issue("shopping-need.duplicate", "This item is already on the list.")))
-                .orElseGet(() -> new ShoppingNeedOutcome.Confirmed(repository.createItem(listId, productId, need), Notification.success()));
+                .orElseGet(() -> new ShoppingNeedOutcome.Confirmed(repository.createItem(listId, productId, needWithVariant), Notification.success()));
     }
 }
