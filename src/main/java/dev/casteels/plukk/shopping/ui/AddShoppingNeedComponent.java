@@ -7,6 +7,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import dev.casteels.plukk.catalog.api.SearchCatalogProductsUseCase;
+import dev.casteels.plukk.catalog.api.SearchCatalogProductsUseCase.CatalogProductMatch;
+import dev.casteels.plukk.shopping.history.ListRecentShoppingNeedsUseCase;
+import dev.casteels.plukk.shopping.history.ReAddShoppingNeedUseCase;
+import dev.casteels.plukk.shopping.history.ShoppingHistoryRepository.RecentShoppingNeed;
 import dev.casteels.plukk.shopping.input.AddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.CreateCustomProductAndAddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.FindShoppingCategoriesUseCase;
@@ -23,16 +28,23 @@ public class AddShoppingNeedComponent extends VerticalLayout {
     private final AddShoppingNeedUseCase addNeed;
     private final CreateCustomProductAndAddShoppingNeedUseCase createCustomProduct;
     private final FindShoppingCategoriesUseCase findCategories;
+    private final SearchCatalogProductsUseCase searchCatalog;
+    private final ListRecentShoppingNeedsUseCase listRecentNeeds;
+    private final ReAddShoppingNeedUseCase reAddNeed;
     private final Consumer<ShoppingNeedOutcome> resultHandler;
     private final TextField input = new TextField("Add a need");
 
     public AddShoppingNeedComponent(long listId, AddShoppingNeedUseCase addNeed,
             CreateCustomProductAndAddShoppingNeedUseCase createCustomProduct, FindShoppingCategoriesUseCase findCategories,
-            Consumer<ShoppingNeedOutcome> resultHandler) {
+            SearchCatalogProductsUseCase searchCatalog, ListRecentShoppingNeedsUseCase listRecentNeeds,
+            ReAddShoppingNeedUseCase reAddNeed, Consumer<ShoppingNeedOutcome> resultHandler) {
         this.listId = listId;
         this.addNeed = addNeed;
         this.createCustomProduct = createCustomProduct;
         this.findCategories = findCategories;
+        this.searchCatalog = searchCatalog;
+        this.listRecentNeeds = listRecentNeeds;
+        this.reAddNeed = reAddNeed;
         this.resultHandler = resultHandler;
         setPadding(false);
         setSpacing(false);
@@ -46,7 +58,15 @@ public class AddShoppingNeedComponent extends VerticalLayout {
         HorizontalLayout entry = new HorizontalLayout(input, add);
         entry.setWidthFull();
         entry.setFlexGrow(1, input);
-        add(entry);
+
+        Button browse = new Button("Browse catalog", event -> showCatalogSearchDialog());
+        browse.getStyle().set("min-height", "44px");
+        Button recent = new Button("Recent", event -> showRecentNeedsDialog());
+        recent.getStyle().set("min-height", "44px");
+        HorizontalLayout shortcuts = new HorizontalLayout(browse, recent);
+        shortcuts.setWidthFull();
+
+        add(entry, shortcuts);
     }
 
     private void submit() {
@@ -96,6 +116,81 @@ public class AddShoppingNeedComponent extends VerticalLayout {
         Button cancel = new Button("Cancel", event -> dialog.close());
         dialog.getFooter().add(cancel, create);
         dialog.open();
+    }
+
+    private void showCatalogSearchDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Browse catalog");
+        dialog.setCloseOnEsc(true);
+        dialog.setCloseOnOutsideClick(true);
+        dialog.setWidth("90vw");
+        TextField query = new TextField();
+        query.setPlaceholder("Search products");
+        query.setWidthFull();
+        query.setValueChangeMode(com.vaadin.flow.data.value.ValueChangeMode.EAGER);
+        VerticalLayout results = new VerticalLayout();
+        results.setPadding(false);
+        results.setSpacing(false);
+        results.setWidthFull();
+        query.addValueChangeListener(event -> {
+            results.removeAll();
+            for (CatalogProductMatch match : searchCatalog.execute(event.getValue()).matches()) {
+                Button pick = new Button(match.name() + " \u2013 " + match.categoryName(), pickEvent -> {
+                    input.setValue(match.name().toLowerCase(java.util.Locale.ROOT) + " ");
+                    dialog.close();
+                });
+                pick.getStyle().set("min-height", "44px");
+                pick.setWidthFull();
+                results.add(pick);
+            }
+        });
+        dialog.add(query, results);
+        Button close = new Button("Close", event -> dialog.close());
+        dialog.getFooter().add(close);
+        dialog.open();
+    }
+
+    private void showRecentNeedsDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Recently purchased");
+        dialog.setCloseOnEsc(true);
+        dialog.setCloseOnOutsideClick(true);
+        dialog.setWidth("90vw");
+        VerticalLayout results = new VerticalLayout();
+        results.setPadding(false);
+        results.setSpacing(false);
+        results.setWidthFull();
+        var needs = listRecentNeeds.execute().needs();
+        if (needs.isEmpty()) {
+            results.add(new Span("No recently purchased needs yet."));
+        }
+        for (RecentShoppingNeed need : needs) {
+            Button pick = new Button(recentNeedLabel(need), event -> {
+                try {
+                    ShoppingNeedOutcome result = reAddNeed.execute(listId, need.entryId());
+                    dialog.close();
+                    resultHandler.accept(result);
+                } catch (RuntimeException exception) {
+                    showUnexpectedError(exception);
+                }
+            });
+            pick.getStyle().set("min-height", "44px");
+            pick.setWidthFull();
+            results.add(pick);
+        }
+        dialog.add(results);
+        Button close = new Button("Close", event -> dialog.close());
+        dialog.getFooter().add(close);
+        dialog.open();
+    }
+
+    private String recentNeedLabel(RecentShoppingNeed need) {
+        String label = need.variant() != null ? need.variant() : need.productName();
+        if (need.quantity() != null) label += " - " + need.quantity().stripTrailingZeros().toPlainString();
+        if (need.unit() != null) label += " " + need.unit();
+        if (need.packageSize() != null) label += " x " + need.packageSize().stripTrailingZeros().toPlainString() + " " + need.packageUnit();
+        if (need.packageDescriptor() != null) label += " " + need.packageDescriptor();
+        return label;
     }
 
     private void showUnexpectedError(RuntimeException exception) {

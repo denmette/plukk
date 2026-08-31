@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
         displayName = "Catalog",
-        allowedDependencies = {"household", "identity", "shared"}
+        allowedDependencies = {"household::api", "identity", "shared::notification"}
 )
 package dev.casteels.plukk.catalog;

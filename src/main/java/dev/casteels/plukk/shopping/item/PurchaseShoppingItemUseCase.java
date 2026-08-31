@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
 import dev.casteels.plukk.shared.notification.Notification;
+import dev.casteels.plukk.shopping.history.ShoppingHistoryRepository;
 import dev.casteels.plukk.shopping.list.OpenShoppingListUseCase;
 
 /**
@@ -16,11 +17,14 @@ public class PurchaseShoppingItemUseCase {
     private final AuthorizedHouseholdUser authUser;
     private final OpenShoppingListUseCase openList;
     private final ShoppingItemRepository repository;
+    private final ShoppingHistoryRepository historyRepository;
 
-    PurchaseShoppingItemUseCase(AuthorizedHouseholdUser authUser, OpenShoppingListUseCase openList, ShoppingItemRepository repository) {
+    PurchaseShoppingItemUseCase(AuthorizedHouseholdUser authUser, OpenShoppingListUseCase openList, ShoppingItemRepository repository,
+            ShoppingHistoryRepository historyRepository) {
         this.authUser = authUser;
         this.openList = openList;
         this.repository = repository;
+        this.historyRepository = historyRepository;
     }
 
     @Transactional
@@ -33,7 +37,10 @@ public class PurchaseShoppingItemUseCase {
         if (!listNotification.isSuccess()) return new Result(null, listNotification);
 
         return repository.markPurchased(listId, itemId)
-                .map(item -> new Result(item, Notification.success()))
+                .map(item -> {
+                    historyRepository.recordPurchase(user.get().householdId(), item);
+                    return new Result(item, Notification.success());
+                })
                 .orElseGet(() -> new Result(null, Notification.issue("shopping-item.not-found", "Shopping item not found.")));
     }
 

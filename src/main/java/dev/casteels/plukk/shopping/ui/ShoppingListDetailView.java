@@ -15,6 +15,9 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import dev.casteels.plukk.catalog.api.SearchCatalogProductsUseCase;
+import dev.casteels.plukk.shopping.history.ListRecentShoppingNeedsUseCase;
+import dev.casteels.plukk.shopping.history.ReAddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.AddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.CreateCustomProductAndAddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.FindShoppingCategoriesUseCase;
@@ -37,6 +40,9 @@ public class ShoppingListDetailView extends VerticalLayout implements BeforeEnte
     private final AddShoppingNeedUseCase addNeed;
     private final CreateCustomProductAndAddShoppingNeedUseCase createCustomProduct;
     private final FindShoppingCategoriesUseCase findCategories;
+    private final SearchCatalogProductsUseCase searchCatalog;
+    private final ListRecentShoppingNeedsUseCase listRecentNeeds;
+    private final ReAddShoppingNeedUseCase reAddNeed;
     private final GetShoppingListSectionsUseCase getSections;
     private final PurchaseShoppingItemUseCase purchaseItem;
     private final RestoreShoppingItemUseCase restoreItem;
@@ -47,12 +53,16 @@ public class ShoppingListDetailView extends VerticalLayout implements BeforeEnte
 
     public ShoppingListDetailView(OpenShoppingListUseCase openList, AddShoppingNeedUseCase addNeed,
             CreateCustomProductAndAddShoppingNeedUseCase createCustomProduct, FindShoppingCategoriesUseCase findCategories,
+            SearchCatalogProductsUseCase searchCatalog, ListRecentShoppingNeedsUseCase listRecentNeeds, ReAddShoppingNeedUseCase reAddNeed,
             GetShoppingListSectionsUseCase getSections, PurchaseShoppingItemUseCase purchaseItem,
             RestoreShoppingItemUseCase restoreItem, RemoveShoppingItemUseCase removeItem) {
         this.openList = openList;
         this.addNeed = addNeed;
         this.createCustomProduct = createCustomProduct;
         this.findCategories = findCategories;
+        this.searchCatalog = searchCatalog;
+        this.listRecentNeeds = listRecentNeeds;
+        this.reAddNeed = reAddNeed;
         this.getSections = getSections;
         this.purchaseItem = purchaseItem;
         this.restoreItem = restoreItem;
@@ -78,7 +88,8 @@ public class ShoppingListDetailView extends VerticalLayout implements BeforeEnte
         ShoppingList list = result.list();
         title.setText(list.name());
         if (getChildren().noneMatch(AddShoppingNeedComponent.class::isInstance)) {
-            addComponentAsFirst(new AddShoppingNeedComponent(listId, addNeed, createCustomProduct, findCategories, this::handleAddResult));
+            addComponentAsFirst(new AddShoppingNeedComponent(listId, addNeed, createCustomProduct, findCategories, searchCatalog,
+                    listRecentNeeds, reAddNeed, this::handleAddResult));
         }
         refreshSections();
     }

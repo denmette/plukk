@@ -7,6 +7,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
+import dev.casteels.plukk.catalog.api.SearchCatalogProductsUseCase;
+import dev.casteels.plukk.shopping.history.ListRecentShoppingNeedsUseCase;
+import dev.casteels.plukk.shopping.history.ReAddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.AddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.CreateCustomProductAndAddShoppingNeedUseCase;
 import dev.casteels.plukk.shopping.input.FindCatalogProductNameUseCase;
@@ -34,6 +37,9 @@ class UseCaseArchitectureTest {
                 PurchaseShoppingItemUseCase.class,
                 RestoreShoppingItemUseCase.class,
                 RemoveShoppingItemUseCase.class,
+                SearchCatalogProductsUseCase.class,
+                ListRecentShoppingNeedsUseCase.class,
+                ReAddShoppingNeedUseCase.class,
                 CreateShoppingListUseCase.class,
                 DeleteShoppingListUseCase.class,
                 FindShoppingListsUseCase.class,

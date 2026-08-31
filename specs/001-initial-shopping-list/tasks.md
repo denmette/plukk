@@ -150,17 +150,17 @@ needs and re-adds the same variant, quantity, and unit without duplicate active-
 
 ### Tests for User Story 4
 
-- [ ] T038 [P] [US4] Add public-Use-Case tests for catalog search, household-wide recent lookup, copied details, and duplicate Notification outcomes in src/test/java/dev/casteels/plukk/shopping/history/ShoppingHistoryUseCaseTest.java
-- [ ] T039 [P] [US4] Add PostgreSQL Testcontainers tests for catalog visibility, household-wide history, and re-add persistence in src/test/java/dev/casteels/plukk/shopping/history/ShoppingHistoryIntegrationTest.java
-- [ ] T040 [P] [US4] Add Playwright mobile coverage for catalog search and cross-member recent-need re-addition in src/test/java/dev/casteels/plukk/e2e/ReuseRecentNeedE2ETest.java
+- [X] T038 [P] [US4] Add public-Use-Case tests for catalog search, household-wide recent lookup, copied details, and duplicate Notification outcomes in src/test/java/dev/casteels/plukk/shopping/history/ShoppingHistoryUseCaseTest.java
+- [X] T039 [P] [US4] Add PostgreSQL Testcontainers tests for catalog visibility, household-wide history, and re-add persistence in src/test/java/dev/casteels/plukk/shopping/history/ShoppingHistoryIntegrationTest.java
+- [X] T040 [P] [US4] Add Playwright mobile coverage for catalog search and cross-member recent-need re-addition in src/test/java/dev/casteels/plukk/e2e/ReuseRecentNeedE2ETest.java
 
 ### Implementation for User Story 4
 
-- [ ] T041 [US4] Implement catalog search as a public catalog Use Case using catalog-owned persistence in src/main/java/dev/casteels/plukk/catalog/SearchCatalogProductsUseCase.java and src/main/java/dev/casteels/plukk/catalog/product/CatalogProductRepository.java
-- [ ] T042 [US4] Implement household-wide history recording, recent lookup, and re-addition through one-operation shopping Use Cases in src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryEntry.java, src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryRepository.java, src/main/java/dev/casteels/plukk/shopping/history/ListRecentShoppingNeedsUseCase.java, and src/main/java/dev/casteels/plukk/shopping/history/ReAddShoppingNeedUseCase.java
-- [ ] T043 [US4] Record copied concrete details only after a purchase is confirmed in src/main/java/dev/casteels/plukk/shopping/item/PurchaseShoppingItemUseCase.java
-- [ ] T044 [US4] Add catalog-search and recent-need UI affordances that translate Use Case outcomes in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java
-- [ ] T045 [US4] Document catalog ownership and household-wide history reuse in docs/domain/catalog-and-history.md
+- [X] T041 [US4] Implement catalog search as a public catalog Use Case using catalog-owned persistence in src/main/java/dev/casteels/plukk/catalog/api/SearchCatalogProductsUseCase.java and src/main/java/dev/casteels/plukk/catalog/product/CatalogProductRepository.java (moved into the catalog::api named interface so the shopping module's existing allowedDependencies can reach it)
+- [X] T042 [US4] Implement household-wide history recording, recent lookup, and re-addition through one-operation shopping Use Cases in src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryEntry.java, src/main/java/dev/casteels/plukk/shopping/history/ShoppingHistoryRepository.java, src/main/java/dev/casteels/plukk/shopping/history/ListRecentShoppingNeedsUseCase.java, and src/main/java/dev/casteels/plukk/shopping/history/ReAddShoppingNeedUseCase.java
+- [X] T043 [US4] Record copied concrete details only after a purchase is confirmed in src/main/java/dev/casteels/plukk/shopping/item/PurchaseShoppingItemUseCase.java
+- [X] T044 [US4] Add catalog-search and recent-need UI affordances that translate Use Case outcomes in src/main/java/dev/casteels/plukk/shopping/ui/AddShoppingNeedComponent.java
+- [X] T045 [US4] Document catalog ownership and household-wide history reuse in docs/domain/catalog-and-history.md
 
 **Checkpoint**: Reuse is household-wide, non-predictive, and retains concrete shopping details.
 
