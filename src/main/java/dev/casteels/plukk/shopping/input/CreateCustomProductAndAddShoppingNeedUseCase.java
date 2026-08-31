@@ -1,11 +1,12 @@
 package dev.casteels.plukk.shopping.input;
 
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import dev.casteels.plukk.catalog.api.CatalogProductAccess;
 import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
 import dev.casteels.plukk.shared.notification.Notification;
 import dev.casteels.plukk.shopping.list.OpenShoppingListUseCase;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Creates a household-local custom product and immediately adds it as a shopping need item.

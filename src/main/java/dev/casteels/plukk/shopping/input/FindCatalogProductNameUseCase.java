@@ -1,9 +1,10 @@
 package dev.casteels.plukk.shopping.input;
 
-import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import dev.casteels.plukk.household.api.AuthorizedHouseholdUser;
 
 @Component
 public class FindCatalogProductNameUseCase {

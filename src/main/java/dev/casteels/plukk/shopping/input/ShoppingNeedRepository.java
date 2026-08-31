@@ -1,11 +1,13 @@
 package dev.casteels.plukk.shopping.input;
 
-import dev.casteels.plukk.shopping.item.ShoppingItem;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+
+import dev.casteels.plukk.shopping.item.ShoppingItem;
 
 /**
  * Shopping-owned persistence adapter for shopping items and item-related queries.
