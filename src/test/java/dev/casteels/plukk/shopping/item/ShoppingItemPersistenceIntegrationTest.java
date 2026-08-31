@@ -2,12 +2,6 @@ package dev.casteels.plukk.shopping.item;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-
-import dev.casteels.plukk.PlukkApplication;
-import dev.casteels.plukk.shopping.input.AddShoppingNeedUseCase;
-import dev.casteels.plukk.shopping.input.ShoppingNeedOutcome;
-import dev.casteels.plukk.shopping.list.CreateShoppingListUseCase;
-import dev.casteels.plukk.shopping.list.ShoppingList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +15,12 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import dev.casteels.plukk.PlukkApplication;
+import dev.casteels.plukk.shopping.input.AddShoppingNeedUseCase;
+import dev.casteels.plukk.shopping.input.ShoppingNeedOutcome;
+import dev.casteels.plukk.shopping.list.CreateShoppingListUseCase;
+import dev.casteels.plukk.shopping.list.ShoppingList;
 
 @SpringBootTest(classes = PlukkApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
